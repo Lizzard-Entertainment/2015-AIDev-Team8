@@ -101,20 +101,22 @@ end
 to firstRow
   
   set curCol curCol + 1
+  
+      if curCol = 17 [ initrow set curRow curRow - 1 stop ]
 
 
     ask patch curCol curRow 
        [
          
          ;check if patch is a Brick or not
-         ifelse pcolor != blue [ 
+         ifelse pcolor = red [ 
                                if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
                                
-                               set pcolor groupColor
                                set groupID groupIdCounter
                                set plabel groupID
-                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupIdCounter set plabel groupID]] ;ask ahead
-                               ;ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor set groupID groupIdCounter set plabel groupID ]] ;ask below
+                               
+                               if curCol != 16 [ask patch (curCol + 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]]] ;ask ahead but not in the last Col
+                               ;ask patch curCol (curRow - 1) [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]] ;ask below
                                
                               ]
          
@@ -124,7 +126,8 @@ to firstRow
         ]
     
       
-    if curCol = 15 [ initrow set curRow curRow - 1 stop ]
+
+
   
 end
 
@@ -139,26 +142,30 @@ to secRow
        [
          
          ;check if patch is a Brick or not
-         ifelse pcolor != blue [ 
-                               ;if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
+         ifelse pcolor = red [ 
                                
-                               if [pcolor] of patch curCol (curRow + 1) != blue [ set groupColor [pcolor] of patch curCol (curRow + 1)  set groupID [groupID] of patch curCol (curRow + 1) ] ;ask above
+                               
+                               ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1) ] ;ask above
+                               [set groupID groupIdCounter ]
+                               
 
-                               set pcolor groupColor
-                              ; set plabel groupID
+                               set plabel groupID
                                
-                               ask patch (curCol - 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupID set plabel groupID  ]] ;ask behind
-                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupID set plabel groupID  ]] ;ask ahead
+                               
+                               ask patch (curCol - 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]] ;ask behind
+                               ask patch (curCol + 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]] ;ask ahead
                                
                               ]
          
          
          
-         [nextGroupColor  set groupIdCounter groupIdCounter + 1] ; is not a Brick    
+         [ set groupIdCounter groupIdCounter + 1] ; is not a Brick    
         ]
     
     
     if curCol = 15 [ initrow set curRow curRow - 1 stop ]
+    
+
   
 end
 
