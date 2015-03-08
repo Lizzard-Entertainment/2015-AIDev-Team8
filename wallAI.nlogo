@@ -14,13 +14,29 @@ patches-own [groupID] ;to group Units together
 globals [
   groupIdCounter         ;to keep track of the number of units
   isfirtsredfound
+  
+  WorldRowCount
+  WorldColCount
 
+  curCol
+  curRow
+  groupColor
 
          ]
 
 to init
+    set WorldRowCount 16 ;
+    set WorldColCount 16 ; the dimensions of the non-wrapping world
+    
     set groupIdCounter 0 ;reset the groupcounter
     set isfirtsredfound false;
+    
+
+    
+     set curCol -17
+     set curRow 16
+     
+     set groupColor 7
   
 end
 
@@ -33,10 +49,11 @@ to genmap
   ask patches [set pcolor blue] 
   
 ;generate a random map, so I can play with it =)
-  let i 0
+  
+  let i -17
   loop 
   [
-    set i i + 1
+    set  i i + 1
     ask patch random-pxcor random-pycor [set pcolor red]
     
     if i = filling_level [ stop ]
@@ -55,31 +72,7 @@ end
 
 to formUnits
   
-  ;go through one row, checking each patch for its colour
-  let i -17
-  loop 
-  [
-    set i i + 1
-    ;*ask patch i 16 [ifelse pcolor = red [print "1"][print "0"]]
-    ask patch i 16 
-       [
-         
-         ;check if patch is a Brick or not
-         ifelse pcolor = red [ 
-                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
-                               
-                               ask neighbors4 with [pcolor = red] [  set groupID [groupID] of patch-at i 16 set pcolor yellow  ]
-                               
-                              ]
-         
-         
-         
-         [print "0"] ; is not a Brick    
-        ]
-    
-    if i = 16 [ stop ]
-   ]
-  
+init  
 end
 
 to lookAround
@@ -90,6 +83,79 @@ to lookAround
  
   ;*ask patch -14 14 [if any? neighbors4 with [pcolor = red] [ ask neighbors4 [set pcolor yellow ]]]
   ask patch -14 14 [ask neighbors4 with [pcolor = red] [  set pcolor yellow ]]
+  
+end
+
+
+to firstRow
+  
+  set curCol curCol + 1
+
+
+    ask patch curCol curRow 
+       [
+         
+         ;check if patch is a Brick or not
+         ifelse pcolor != blue [ 
+                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
+                               
+                               set pcolor groupColor
+                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor  ]] ;ask ahead
+                               ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor  ]] ;ask below
+                               
+                              ]
+         
+         
+         
+         [nextGroupColor] ; is not a Brick    
+        ]
+    
+    print curCol
+    
+    if curCol = 15 [ init set curRow curRow - 1 stop ]
+  
+end
+
+
+to secRow
+
+  set curCol curCol + 1
+  
+
+
+    ask patch curCol curRow 
+       [
+         
+         ;check if patch is a Brick or not
+         ifelse pcolor != blue [ 
+                               ;if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
+                               
+                               if [pcolor] of patch curCol (curRow + 1) != blue [ set groupColor [pcolor] of patch curCol (curRow + 1) ] ;ask above
+
+                               set pcolor groupColor
+                               
+                               
+                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor  ]] ;ask ahead
+                               ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor  ]] ;ask below
+                               
+                              ]
+         
+         
+         
+         [nextGroupColor] ; is not a Brick    
+        ]
+    
+    print curCol
+    
+    if curCol = 15 [ stop ]
+  
+end
+
+to nextGroupColor
+  
+  set  groupColor groupColor + 10
+  
+  if  groupColor = 147 [ set groupColor 7]
   
 end
 @#$#@#$#@
@@ -177,6 +243,40 @@ BUTTON
 NIL
 lookAround
 NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+73
+402
+151
+435
+NIL
+firstRow
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+40
+498
+114
+531
+NIL
+secRow
+T
 1
 T
 OBSERVER
