@@ -38,7 +38,7 @@ to init
     set curRow 16
     
 
-     
+
      set groupColor 7
      
      initrow
@@ -74,56 +74,58 @@ end
 
 
 
-to discover
-  
-  ask patch 16 14 [set pcolor green]
-  
-  formUnits
-end
 
 to formUnits
+  initrow
+firstRow
+
+  let i -16
+loop
+[
+  secRow
   
-init  
+  set curRow curRow - 1
+  
+ set i i + 1
+ 
+ if i = 3 [ stop ]
+]
+
+
 end
 
-to lookAround
-  
- ask patch -14 14 [set pcolor green]
- 
- ;*ask patch -14 14 [ask neighbors4 [ set pcolor yellow ]]
- 
-  ;*ask patch -14 14 [if any? neighbors4 with [pcolor = red] [ ask neighbors4 [set pcolor yellow ]]]
-  ask patch -14 14 [ask neighbors4 with [pcolor = red] [  set pcolor yellow ]]
-  
-end
+
 
 
 to firstRow
   
   set curCol curCol + 1
   
-      if curCol = 17 [ initrow set curRow curRow - 1 stop ]
+      if curCol = 17 [ initrow set curRow curRow - 1  stop ]
 
 
     ask patch curCol curRow 
        [
          
          ;check if patch is a Brick or not
-         ifelse pcolor = red [ 
-                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 2 set isfirtsredfound true]
+         if pcolor = red [ 
+                               ;own label / colour
                                
-                               if groupID = 0[ set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]
+                               ifelse curCol = -16 [set groupID (groupIdCounter + 1) set groupIdCounter groupIdCounter + 2 set plabel groupID set pcolor groupID]
+
                                
-                               set plabel groupID
+                                 [
+                                 ask patch (curCol - 1) curRow [
+                                    
+                                     if (pcolor = red) and (groupID != 0) [ set groupID [groupID] of patch (curCol - 1) curRow  set plabel groupID set pcolor groupID]
+                                     if (pcolor = red) and (groupID  = 0) [ set groupID  groupIdCounter set groupIdCounter groupIdCounter + 1  set plabel groupID set pcolor groupID]
+                                     
+                                                                ]
                                
-                               if curCol != 16 [ask patch (curCol + 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]]] ;ask ahead but not in the last Col
-                               ;ask patch curCol (curRow - 1) [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]] ;ask below
+                                 ] ;ask behind but not in the last Col
                                
                               ]
-         
-         
-         
-         [nextGroupColor  ] ; is not a Brick    
+            
         ]
   
 end
@@ -140,16 +142,17 @@ to secRow
        [
          
          ;check if patch is a Brick or not
-         ifelse pcolor = red [ 
+         ifelse (pcolor = red) and (groupID != 0) [ 
                                
                                
                                ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1)  set rowAboveBrick  true] ;ask above
                                [if groupID = 0 [set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]]
                                set plabel groupID
+                               set pcolor groupID
                                
                                
-                              if curCol != -16 [ask patch (curCol - 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask behind, except in the first col
-                              if curCol != 16  [ask patch (curCol + 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask ahead, except the last col
+                              if curCol != -16 [ask patch (curCol - 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID set pcolor groupID ]]] ;ask behind, except in the first col
+                              if curCol != 16  [ask patch (curCol + 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID set pcolor groupID ]]] ;ask ahead, except the last col
                                
                               ]
          
@@ -234,40 +237,6 @@ NIL
 HORIZONTAL
 
 BUTTON
-66
-51
-144
-84
-NIL
-discover
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-52
-302
-146
-335
-NIL
-lookAround
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
 73
 402
 151
@@ -291,7 +260,24 @@ BUTTON
 531
 NIL
 secRow
+NIL
+1
 T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+49
+583
+134
+616
+NIL
+formUnits
+NIL
 1
 T
 OBSERVER
