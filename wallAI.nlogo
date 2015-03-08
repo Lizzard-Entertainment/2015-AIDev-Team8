@@ -1,4 +1,33 @@
+; Author: Zoltan Tompa - 2015
+;
+;
+; notes: 
+;       by default, patches get a groupID variable with the initial value of 0 !!!
+;       word wrapping has to be disabled
+;
+;
+;
+
+patches-own [groupID] ;to group Units together
+
+
+globals [
+  groupIdCounter         ;to keep track of the number of units
+  isfirtsredfound
+
+
+         ]
+
+to init
+    set groupIdCounter 0 ;reset the groupcounter
+    set isfirtsredfound false;
+  
+end
+
+
 to genmap
+  init
+
   
 ; set BG to blue
   ask patches [set pcolor blue] 
@@ -12,6 +41,55 @@ to genmap
     
     if i = filling_level [ stop ]
    ]
+  
+end
+
+
+
+to discover
+  
+  ask patch 16 14 [set pcolor green]
+  
+  formUnits
+end
+
+to formUnits
+  
+  ;go through one row, checking each patch for its colour
+  let i -17
+  loop 
+  [
+    set i i + 1
+    ;*ask patch i 16 [ifelse pcolor = red [print "1"][print "0"]]
+    ask patch i 16 
+       [
+         
+         ;check if patch is a Brick or not
+         ifelse pcolor = red [ 
+                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
+                               
+                               ask neighbors4 with [pcolor = red] [  set groupID [groupID] of patch-at i 16 set pcolor yellow  ]
+                               
+                              ]
+         
+         
+         
+         [print "0"] ; is not a Brick    
+        ]
+    
+    if i = 16 [ stop ]
+   ]
+  
+end
+
+to lookAround
+  
+ ask patch -14 14 [set pcolor green]
+ 
+ ;*ask patch -14 14 [ask neighbors4 [ set pcolor yellow ]]
+ 
+  ;*ask patch -14 14 [if any? neighbors4 with [pcolor = red] [ ask neighbors4 [set pcolor yellow ]]]
+  ask patch -14 14 [ask neighbors4 with [pcolor = red] [  set pcolor yellow ]]
   
 end
 @#$#@#$#@
@@ -29,8 +107,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -16
 16
@@ -68,11 +146,45 @@ filling_level
 filling_level
 0
 500
-239
+366
 1
 1
 NIL
 HORIZONTAL
+
+BUTTON
+66
+51
+144
+84
+NIL
+discover
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+52
+302
+146
+335
+NIL
+lookAround
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
