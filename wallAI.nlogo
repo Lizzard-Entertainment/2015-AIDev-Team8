@@ -25,25 +25,36 @@ globals [
          ]
 
 to init
+  
+    clear-patches 
+    
+    
     set WorldRowCount 16 ;
     set WorldColCount 16 ; the dimensions of the non-wrapping world
     
     set groupIdCounter 0 ;reset the groupcounter
     set isfirtsredfound false;
     
-
+    set curRow 16
     
-     set curCol -17
-     set curRow 16
+
      
      set groupColor 7
+     
+     initrow
+  
+end
+
+to initrow
+  
+       set curCol -17
   
 end
 
 
 to genmap
+  
   init
-
   
 ; set BG to blue
   ask patches [set pcolor blue] 
@@ -100,26 +111,27 @@ to firstRow
                                if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
                                
                                set pcolor groupColor
-                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor  ]] ;ask ahead
-                               ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor  ]] ;ask below
+                               set groupID groupIdCounter
+                               set plabel groupID
+                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupIdCounter set plabel groupID]] ;ask ahead
+                               ;ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor set groupID groupIdCounter set plabel groupID ]] ;ask below
                                
                               ]
          
          
          
-         [nextGroupColor] ; is not a Brick    
+         [nextGroupColor set groupIdCounter groupIdCounter + 1] ; is not a Brick    
         ]
     
-    print curCol
-    
-    if curCol = 15 [ init set curRow curRow - 1 stop ]
+      
+    if curCol = 15 [ initrow set curRow curRow - 1 stop ]
   
 end
 
 
 to secRow
 
-  set curCol curCol + 1
+  set curCol curCol + 2
   
 
 
@@ -130,24 +142,23 @@ to secRow
          ifelse pcolor != blue [ 
                                ;if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
                                
-                               if [pcolor] of patch curCol (curRow + 1) != blue [ set groupColor [pcolor] of patch curCol (curRow + 1) ] ;ask above
+                               if [pcolor] of patch curCol (curRow + 1) != blue [ set groupColor [pcolor] of patch curCol (curRow + 1)  set groupID [groupID] of patch curCol (curRow + 1) ] ;ask above
 
                                set pcolor groupColor
+                              ; set plabel groupID
                                
-                               
-                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor  ]] ;ask ahead
-                               ask patch curCol (curRow - 1) [if pcolor != blue [ set pcolor groupColor  ]] ;ask below
+                               ask patch (curCol - 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupID set plabel groupID  ]] ;ask behind
+                               ask patch (curCol + 1) curRow [if pcolor != blue [ set pcolor groupColor set groupID groupID set plabel groupID  ]] ;ask ahead
                                
                               ]
          
          
          
-         [nextGroupColor] ; is not a Brick    
+         [nextGroupColor  set groupIdCounter groupIdCounter + 1] ; is not a Brick    
         ]
     
-    print curCol
     
-    if curCol = 15 [ stop ]
+    if curCol = 15 [ initrow set curRow curRow - 1 stop ]
   
 end
 
@@ -158,15 +169,16 @@ to nextGroupColor
   if  groupColor = 147 [ set groupColor 7]
   
 end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
 10
-649
-470
+800
+621
 16
 16
-13.0
+17.6
 1
 10
 1
