@@ -108,6 +108,7 @@ to firstRow
        [
          
          ;check if patch is a Brick or not
+<<<<<<< HEAD
          if pcolor = red [ 
                                ;own label / colour
                                
@@ -121,22 +122,39 @@ to firstRow
                                      if (pcolor = red) and (groupID  = 0) [ set groupID  groupIdCounter set groupIdCounter groupIdCounter + 1  set plabel groupID set pcolor groupID]
                                      
                                                                 ]
+=======
+         ifelse pcolor = red [ 
+                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 1 set isfirtsredfound true]
+                               
+                               set groupID groupIdCounter
+                               set plabel groupID
+>>>>>>> parent of 3709853... some improvements
                                
                                  ] ;ask behind but not in the last Col
                                
                               ]
+<<<<<<< HEAD
             
+=======
+         
+         
+         
+         [nextGroupColor set groupIdCounter groupIdCounter + 1] ; is not a Brick    
+>>>>>>> parent of 3709853... some improvements
         ]
+    
+      
+
+
   
 end
 
 
 to secRow
 
-  set curCol curCol + 1
-      if curCol = 17 [ initrow set curRow curRow - 1 stop ]
+  set curCol curCol + 2
   
-  let rowAboveBrick  false;
+
 
     ask patch curCol curRow 
        [
@@ -145,24 +163,31 @@ to secRow
          ifelse (pcolor = red) and (groupID != 0) [ 
                                
                                
-                               ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1)  set rowAboveBrick  true] ;ask above
-                               [if groupID = 0 [set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]]
+                               ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1) ] ;ask above
+                               [set groupID groupIdCounter ]
+                               
+
                                set plabel groupID
                                set pcolor groupID
                                
                                
+<<<<<<< HEAD
                               if curCol != -16 [ask patch (curCol - 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID set pcolor groupID ]]] ;ask behind, except in the first col
                               if curCol != 16  [ask patch (curCol + 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID set pcolor groupID ]]] ;ask ahead, except the last col
+=======
+                               ask patch (curCol - 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]] ;ask behind
+                               ask patch (curCol + 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]] ;ask ahead
+>>>>>>> parent of 3709853... some improvements
                                
                               ]
          
          
          
-         [ ] ; is not a Brick    
+         [ set groupIdCounter groupIdCounter + 1] ; is not a Brick    
         ]
     
     
-
+    if curCol = 15 [ initrow set curRow curRow - 1 stop ]
     
 
   
@@ -230,7 +255,7 @@ filling_level
 filling_level
 0
 500
-468
+366
 1
 1
 NIL
