@@ -250,10 +250,10 @@ to decideUnitMovingDirection
   let _rightPCT (_right / count patches with [groupID = selectedUnit]) * 100
   let _downPCT (_down / count patches with [groupID = selectedUnit]) * 100
   
-  if (_leftPCT > 50) [set UnitMovingDir 0]
-  if (_upPCT > 50) [set UnitMovingDir 1]
-  if (_rightPCT > 50) [set UnitMovingDir 2]
-  if (_downPCT > 50) [set UnitMovingDir 3]  
+  if (_leftPCT > Y) [set UnitMovingDir 0]
+  if (_upPCT > Y) [set UnitMovingDir 1]
+  if (_rightPCT > Y) [set UnitMovingDir 2]
+  if (_downPCT > Y) [set UnitMovingDir 3]  
      
  ]  
 
@@ -416,7 +416,7 @@ Y
 Y
 51
 100
-75
+59
 1
 1
 NIL
