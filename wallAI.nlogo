@@ -9,6 +9,7 @@
 ;
 
 patches-own [
+             patchID    ; a simple counter for all patches to be numbered starts with 1
              groupID    ; to group Units together
              movingWill   ;how much the individual Bricks want to move (scale 0-10)
              movingDir  ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
@@ -21,7 +22,10 @@ globals [
    ;Y the precentige need to be met for a unit to decide on moving direction
     
   groupIdCounter         ;to keep track of the number of units
+  patchIDcounter         ;to number the patches
   isfirtsredfound
+  
+  UnitIDList             ;list of existing UnitIDs
   
   WorldRowCount
   WorldColCount
@@ -38,6 +42,7 @@ to init
   
     clear-patches 
     
+    set patchIDcounter 1;
     
     set WorldRowCount 16 ;
     set WorldColCount 16 ; the dimensions of the non-wrapping world
@@ -84,6 +89,7 @@ end
 
 to formUnits
   
+  ;; form the first row (call method)
   set curCol -17
   let i -16
   while [ i < 17]
@@ -96,7 +102,7 @@ to formUnits
    
    
    
-    
+  ;; form the other rows (call method)  
   let j -16 
 
   while [ j < 17]  
@@ -128,11 +134,16 @@ to firstRow
   
   set curCol curCol + 1
   
+  
+  
       if curCol = 17 [ initrow set curRow curRow - 1 stop ]
 
 
     ask patch curCol curRow 
        [
+         ;number every patch for easier processing
+         set patchID patchIDcounter
+         set patchIDcounter patchIDcounter + 1
          
          ;check if patch is a Brick or not
          ifelse pcolor = red [ 
@@ -156,8 +167,6 @@ end
 
 
 to secRow
-
-
   set curCol curCol + 1
       if curCol = 17 [ initrow set curRow curRow - 1 stop ]
   
@@ -165,6 +174,10 @@ to secRow
 
     ask patch curCol curRow 
        [
+         
+         ;number every patch for easier processing
+         set patchID patchIDcounter
+         set patchIDcounter patchIDcounter + 1
          
          ;check if patch is a Brick or not
          ifelse pcolor = red [ 
@@ -185,22 +198,23 @@ to secRow
          [ ] ; is not a Brick    
         ]
     
-    
-
-    
-
-  
-end
-
-to nextGroupColor
-  
-  set  groupColor groupColor + 10
-  
-  if  groupColor = 147 [ set groupColor 7]
-  
 end
 
 
+to buildUnitIDList
+
+let i 1
+
+while [i <= patchIDcounter]
+
+[
+
+
+  
+set i i + 1  
+]
+
+end
 
 ;; method to pick a random unit (will return the groupID)
 to pickOneUnit
