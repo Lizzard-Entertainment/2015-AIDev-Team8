@@ -8,10 +8,17 @@
 ;
 ;
 
-patches-own [groupID] ;to group Units together
+patches-own [groupID    ; to group Units together
+             movingWill ; how much does the unit wants to move on a scale 0-10
+             movingDir  ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
+             ]
 
 
 globals [
+  
+  X ; the precentige need to be met for a unit to decide to move
+  Y ; the precentige need to be met for a unit to decide on moving direction
+    
   groupIdCounter         ;to keep track of the number of units
   isfirtsredfound
   
@@ -21,6 +28,8 @@ globals [
   curCol
   curRow
   groupColor
+  
+  selectedUnit  ;the selected unit choosen to allow to move
 
          ]
 
@@ -189,6 +198,24 @@ to nextGroupColor
   if  groupColor = 147 [ set groupColor 7]
   
 end
+
+
+
+
+to pickOneUnit
+  
+  
+set selectedUnit  random (groupIdCounter - 2) + 1 ; gives a number between 1 and the number of groups
+
+print selectedUnit
+
+ask patches with [groupID = selectedUnit] [set pcolor green]
+
+  
+end
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -211,8 +238,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -290,6 +317,23 @@ BUTTON
 94
 NIL
 formUnits
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+62
+301
+159
+334
+NIL
+pickOneUnit
 NIL
 1
 T
