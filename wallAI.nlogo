@@ -306,9 +306,9 @@ to canMove
   
   ;interpret UnitMovingDir
   if (UnitMovingDir = 0) [set moveColDiff -1]
-  if (UnitMovingDir = 1) [set moveRowDiff -1]
+  if (UnitMovingDir = 1) [set moveRowDiff 1]
   if (UnitMovingDir = 2) [set moveColDiff 1]
-  if (UnitMovingDir = 3) [set moveRowDiff 1]
+  if (UnitMovingDir = 3) [set moveRowDiff -1]
   
   
   ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
@@ -509,6 +509,23 @@ BUTTON
 221
 NIL
 canMove
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+915
+151
+1092
+184
+NIL
+decideUnitMovingDirection
 NIL
 1
 T
