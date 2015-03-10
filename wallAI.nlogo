@@ -36,18 +36,14 @@ to init
     set isfirtsredfound false;
     
     set curRow 16
-    
 
-     
-     set groupColor 7
-     
      initrow
   
 end
 
 to initrow
   
-       set curCol -17
+      set curCol  -17
   
 end
 
@@ -74,31 +70,51 @@ end
 
 
 
-to discover
-  
-  ask patch 16 14 [set pcolor green]
-  
-  formUnits
-end
+
 
 to formUnits
   
-init  
+  set curCol -17
+  let i -16
+  while [ i < 17]
+  [
+
+    firstRow
+    set  i i + 1
+  ]
+   
+   
+   
+   
+    
+  let j -16 
+
+  while [ j < 17]  
+  [
+    
+  
+  set i -16
+  while [ i < 17]
+  [
+    secRow
+    set  i (i + 1)
+  ]
+  
+  
+  set  j (j + 1)
+  ]
+    
+    
+  
+  print "gotere"
+  
+  
 end
 
-to lookAround
-  
- ask patch -14 14 [set pcolor green]
- 
- ;*ask patch -14 14 [ask neighbors4 [ set pcolor yellow ]]
- 
-  ;*ask patch -14 14 [if any? neighbors4 with [pcolor = red] [ ask neighbors4 [set pcolor yellow ]]]
-  ask patch -14 14 [ask neighbors4 with [pcolor = red] [  set pcolor yellow ]]
-  
-end
 
 
 to firstRow
+
   
   set curCol curCol + 1
   
@@ -123,13 +139,14 @@ to firstRow
          
          
          
-         [nextGroupColor  ] ; is not a Brick    
+         [  ] ; is not a Brick    
         ]
   
 end
 
 
 to secRow
+
 
   set curCol curCol + 1
       if curCol = 17 [ initrow set curRow curRow - 1 stop ]
@@ -233,40 +250,6 @@ NIL
 HORIZONTAL
 
 BUTTON
-66
-51
-144
-84
-NIL
-discover
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
-52
-302
-146
-335
-NIL
-lookAround
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
-
-BUTTON
 73
 402
 151
@@ -291,6 +274,23 @@ BUTTON
 NIL
 secRow
 T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+69
+61
+154
+94
+NIL
+formUnits
+NIL
 1
 T
 OBSERVER
