@@ -8,16 +8,17 @@
 ;
 ;
 
-patches-own [groupID    ; to group Units together
-             movingWill ; how much does the unit wants to move on a scale 0-10
+patches-own [
+             groupID    ; to group Units together
+             movingWill   ;how much the individual Bricks want to move (scale 0-10)
              movingDir  ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
              ]
 
 
 globals [
   
-  X ; the precentige need to be met for a unit to decide to move
-  Y ; the precentige need to be met for a unit to decide on moving direction
+   ;X the precentige need to be met for a unit to decide to move
+   ;Y the precentige need to be met for a unit to decide on moving direction
     
   groupIdCounter         ;to keep track of the number of units
   isfirtsredfound
@@ -115,7 +116,7 @@ to formUnits
     
     
   
-  print "gotere"
+
   
   
 end
@@ -201,18 +202,32 @@ end
 
 
 
-
+;; method to pick a random unit (will return the groupID)
 to pickOneUnit
   
-  
 set selectedUnit  random (groupIdCounter - 2) + 1 ; gives a number between 1 and the number of groups
-
 print selectedUnit
-
 ask patches with [groupID = selectedUnit] [set pcolor green]
-
+  
+  decideIfMoving
   
 end
+
+;;method to find out if Bricks wants to move more than X or not
+to decideIfMoving
+  
+  let AVG  0
+  ask patches with [groupID = selectedUnit] [set movingWill random 11] ;assign a moovingwill value to each Brick 0-10
+  set AVG sum [movingWill] of patches with [groupID = selectedUnit]
+  set AVG AVG / count patches with [groupID = selectedUnit]
+
+  print AVG
+  
+  ifelse (AVG >= X) [print "to infinity, and beyound!!!"] [] ;check if more Bricks than X wants to move or not
+  
+end
+
+
 
 
 
@@ -245,10 +260,10 @@ ticks
 30.0
 
 BUTTON
-63
-143
-138
-176
+71
+61
+146
+94
 NIL
 genmap
 NIL
@@ -262,25 +277,25 @@ NIL
 1
 
 SLIDER
-21
-201
-193
-234
+18
+18
+190
+51
 filling_level
 filling_level
 0
 500
-468
+467
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-73
-402
-151
-435
+902
+19
+980
+52
 NIL
 firstRow
 T
@@ -294,10 +309,10 @@ NIL
 1
 
 BUTTON
-40
-498
-114
-531
+905
+62
+979
+95
 NIL
 secRow
 T
@@ -311,10 +326,10 @@ NIL
 1
 
 BUTTON
-69
-61
-154
-94
+68
+170
+153
+203
 NIL
 formUnits
 NIL
@@ -328,10 +343,10 @@ NIL
 1
 
 BUTTON
-62
-301
-159
-334
+63
+265
+160
+298
 NIL
 pickOneUnit
 NIL
@@ -343,6 +358,36 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+22
+315
+194
+348
+X
+X
+0
+10
+6
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+22
+363
+194
+396
+Y
+Y
+1
+10
+5
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
