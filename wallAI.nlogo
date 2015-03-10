@@ -4,9 +4,17 @@
 ; notes: 
 ;       by default, patches get a groupID variable with the initial value of 0 !!!
 ;       word wrapping has to be disabled
+;       wall movement doesn't takes the player or enemy's into account, can just crush them
 ;
 ;
-;
+
+
+;;TO-DOs
+
+;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
+;- implement main method
+;- try to implement "interface" that promisses input/outputs (if any) 
+
 
 patches-own [
              patchID    ; a simple counter for all patches to be numbered starts with 1
@@ -26,6 +34,7 @@ globals [
   isfirtsredfound
   
   UnitIDList             ;list of existing UnitIDs
+  UnitMovingDir          ;agreed direction of Unit movement
   
   WorldRowCount
   WorldColCount
@@ -38,6 +47,7 @@ globals [
 
          ]
 
+;-----------------------------------------------------------------------------------------
 to init
   
     clear-patches 
@@ -52,17 +62,18 @@ to init
     
     set curRow 16
 
-     initrow
+    initrow
   
 end
 
+;-----------------------------------------------------------------------------------------
 to initrow
   
       set curCol  -17
   
 end
 
-
+;-----------------------------------------------------------------------------------------
 to genmap
   
   init
@@ -86,7 +97,7 @@ end
 
 
 
-
+;-----------------------------------------------------------------------------------------
 to formUnits
   
   ;; form the first row (call method)
@@ -128,7 +139,7 @@ buildUnitIDList
 end
 
 
-
+;-----------------------------------------------------------------------------------------
 to firstRow
 
   
@@ -165,7 +176,7 @@ to firstRow
   
 end
 
-
+;-----------------------------------------------------------------------------------------
 to secRow
   set curCol curCol + 1
       if curCol = 17 [ initrow set curRow curRow - 1 stop ]
@@ -200,7 +211,7 @@ to secRow
     
 end
 
-
+;-----------------------------------------------------------------------------------------
 to buildUnitIDList
 
 let i 1
@@ -232,6 +243,7 @@ ask patches with [groupID = selectedUnit] [set pcolor green]
 end
 
 ;;method to find out if Bricks wants to move more than X or not
+;-----------------------------------------------------------------------------------------
 to decideIfMoving
   
   let AVG  0
@@ -247,9 +259,10 @@ end
 
 
 ;;method to find out which way Bricks wants to go   [0=left|1=up|2=right|3=down]
+;-----------------------------------------------------------------------------------------
 to decideUnitMovingDirection
   
- let UnitMovingDir  -1
+ set UnitMovingDir  -1 ; set to an invalid value
 
   
  while [UnitMovingDir < 0]
@@ -276,6 +289,41 @@ to decideUnitMovingDirection
 
 print UnitMovingDir
  
+end
+
+;; testmethod to see if selected unit can move right or not
+;; FOR A UNIT TO BE ABLE TO MOVE TO A DIRECTION, LOCATIONS TO ALL BRICKS CURRENT LOC. +1 IN THE MOVING DIRECTIONS HAS TO HAVE EITHER THE UNIT ID, OR 0 (EMPTY)
+;-----------------------------------------------------------------------------------------
+
+to canMove
+  
+  let i  0
+  let unitMemberList []
+  let canUnitMove true ;set to true
+  
+  let moveRowDiff  0
+  let moveColDiff  0
+  
+  ;interpret UnitMovingDir
+  if (UnitMovingDir = 0) [set moveColDiff -1]
+  if (UnitMovingDir = 1) [set moveRowDiff -1]
+  if (UnitMovingDir = 2) [set moveColDiff 1]
+  if (UnitMovingDir = 3) [set moveRowDiff 1]
+  
+  
+  ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
+  
+
+
+  while [i < length unitMemberList]
+  [
+    ask patches with [patchID = item i unitMemberList] [ set pcolor yellow ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ ifelse((groupID = 0)or(groupID = selectedUnit)) [set pcolor black] [set canUnitMove false]]]    
+    set i i + 1
+  ]
+  
+  ;for DEBUGGING
+ ifelse (canUnitMove = false)[print "can't go =("][ print "off we goooo =D"]
+  
 end
 
 
@@ -453,6 +501,23 @@ braveBrickExtraVote
 1
 NIL
 HORIZONTAL
+
+BUTTON
+945
+188
+1055
+221
+NIL
+canMove
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
