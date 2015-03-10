@@ -14,7 +14,7 @@
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
 ;- implement main method
 ;- try to implement "interface" that promisses input/outputs (if any) 
-
+;- "canMove" method needs to consider world boundaries (NULL POINT... -.-") 
 
 patches-own [
              patchID    ; a simple counter for all patches to be numbered starts with 1
@@ -35,13 +35,14 @@ globals [
   
   UnitIDList             ;list of existing UnitIDs
   UnitMovingDir          ;agreed direction of Unit movement
+  canUnitMove            ;is selected Unit free to move to the agreed movement
   
   WorldRowCount
   WorldColCount
 
   curCol
   curRow
-  groupColor
+  
   
   selectedUnit  ;the selected unit choosen to allow to move
 
@@ -291,7 +292,7 @@ print UnitMovingDir
  
 end
 
-;; testmethod to see if selected unit can move right or not
+;; a method to see if the selected Unit can move in the selected direction
 ;; FOR A UNIT TO BE ABLE TO MOVE TO A DIRECTION, LOCATIONS TO ALL BRICKS CURRENT LOC. +1 IN THE MOVING DIRECTIONS HAS TO HAVE EITHER THE UNIT ID, OR 0 (EMPTY)
 ;-----------------------------------------------------------------------------------------
 
@@ -299,7 +300,7 @@ to canMove
   
   let i  0
   let unitMemberList []
-  let canUnitMove true ;set to true
+  set canUnitMove true ;set to true
   
   let moveRowDiff  0
   let moveColDiff  0
@@ -327,7 +328,43 @@ to canMove
 end
 
 
+;; a method to physically move the selected unit, if the movement is AUTOHISED by "canMove" method
+;-----------------------------------------------------------------------------------------
 
+to doMove
+  
+  let i  0
+  let unitMemberList []
+
+  
+  let moveRowDiff  0
+  let moveColDiff  0
+  
+  ;interpret UnitMovingDir
+  if (UnitMovingDir = 0) [set moveColDiff -1]
+  if (UnitMovingDir = 1) [set moveRowDiff 1]
+  if (UnitMovingDir = 2) [set moveColDiff 1]
+  if (UnitMovingDir = 3) [set moveRowDiff -1]
+  
+  
+  
+  ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
+  
+  
+  ;*ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
+  
+
+
+ ;* while [i < length unitMemberList]
+ ;* [
+ ;*   ask patches with [patchID = item i unitMemberList] [ set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]];set groupID selectedUnit]]    
+ ;*   set i i + 1
+ ;* ]
+  
+ ask patches with [pcolor = pink] [ set pcolor red set groupID selectedUnit set plabel groupID]
+ ask patches with [groupID = 0] [set pcolor blue set plabel ""]
+  
+end
 
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -526,6 +563,23 @@ BUTTON
 184
 NIL
 decideUnitMovingDirection
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+988
+248
+1063
+281
+NIL
+doMove
 NIL
 1
 T
