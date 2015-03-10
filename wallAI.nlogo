@@ -315,11 +315,21 @@ to canMove
   ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
   
 
-
-  while [i < length unitMemberList]
+  ; while: If reporter reports false, exit the loop. Otherwise run commands and repeat. 
+  while [(i < length unitMemberList) or (canUnitMove = false)] ; loop ends if all members report true, or one member reports false
   [
+    ;check for world boundaries
+    ask patches with [patchID = item i unitMemberList] [ if ((((pxcor + moveColDiff) < -16) or((pxcor + moveColDiff) > 16)) or (((pycor + moveRowDiff) < -16) or((pycor + moveRowDiff) > 16))) [set canUnitMove false]]
+    
+    if (canUnitMove = true)
+    [
+    ;check for otherwise ok movement (other Units can be in the way)
     ask patches with [patchID = item i unitMemberList] [ set pcolor yellow ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ ifelse((groupID = 0)or(groupID = selectedUnit)) [set pcolor black] [set canUnitMove false]]]    
+    ]
+    
     set i i + 1
+    
+
   ]
   
   ;for DEBUGGING
@@ -531,10 +541,10 @@ SLIDER
 460
 braveBrickExtraVote
 braveBrickExtraVote
-0
-5
-0
-0.1
+100
+500
+100
+10
 1
 NIL
 HORIZONTAL
