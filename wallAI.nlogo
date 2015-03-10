@@ -121,8 +121,8 @@ to formUnits
   ]
     
     
-  
-
+;;call method to generate a valid groupIDlist  
+buildUnitIDList
   
   
 end
@@ -204,22 +204,25 @@ end
 to buildUnitIDList
 
 let i 1
+set UnitIDList []
 
 while [i <= patchIDcounter]
 
 [
 
-
+ask patches with [(patchID = i)] [ if (groupID) != 0 [ ifelse(member? groupID UnitIDList) [] [ set UnitIDList lput groupID UnitIDList ]  ] ]
   
 set i i + 1  
 ]
+
+show UnitIDList
 
 end
 
 ;; method to pick a random unit (will return the groupID)
 to pickOneUnit
   
-set selectedUnit  random (groupIdCounter - 2) + 1 ; gives a number between 1 and the number of groups
+set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of groups
 print selectedUnit
 ask patches with [groupID = selectedUnit] [set pcolor green]
   
