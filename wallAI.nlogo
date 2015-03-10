@@ -210,6 +210,7 @@ print selectedUnit
 ask patches with [groupID = selectedUnit] [set pcolor green]
   
   decideIfMoving
+  decideUnitMovingDirection
   
 end
 
@@ -227,6 +228,38 @@ to decideIfMoving
   
 end
 
+
+;;method to find out which way Bricks wants to go   [0=left|1=up|2=right|3=down]
+to decideUnitMovingDirection
+  
+ let UnitMovingDir  -1
+
+  
+ while [UnitMovingDir < 0]
+ [ 
+  
+  ask patches with [groupID = selectedUnit] [set movingDir random 4] ;assign a moovingDir value to each Brick 0-3
+
+  let _left count patches with [(groupID = selectedUnit) and (movingDir = 0)]
+  let _up count patches with [(groupID = selectedUnit) and (movingDir = 1)]
+  let _right count patches with [(groupID = selectedUnit) and (movingDir = 2)]
+  let _down count patches with [(groupID = selectedUnit) and (movingDir = 3)]
+
+  let _leftPCT (_left / count patches with [groupID = selectedUnit]) * 100
+  let _upPCT (_up / count patches with [groupID = selectedUnit]) * 100
+  let _rightPCT (_right / count patches with [groupID = selectedUnit]) * 100
+  let _downPCT (_down / count patches with [groupID = selectedUnit]) * 100
+  
+  if (_leftPCT > 50) [set UnitMovingDir 0]
+  if (_upPCT > 50) [set UnitMovingDir 1]
+  if (_rightPCT > 50) [set UnitMovingDir 2]
+  if (_downPCT > 50) [set UnitMovingDir 3]  
+     
+ ]  
+
+print UnitMovingDir
+ 
+end
 
 
 
@@ -381,10 +414,25 @@ SLIDER
 396
 Y
 Y
+51
+100
+75
 1
-10
+1
+NIL
+HORIZONTAL
+
+SLIDER
+24
+427
+196
+460
+braveBrickExtraVote
+braveBrickExtraVote
+0
 5
-1
+0
+0.1
 1
 NIL
 HORIZONTAL
