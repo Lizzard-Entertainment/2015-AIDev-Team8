@@ -7,6 +7,8 @@
 ;       wall movement doesn't takes the player or enemy's into account, can just crush them
 ;
 ;
+;; BUGs::
+; - if unit can't move in any direction, it can't reset out from the loop
 
 
 ;;TO-DOs
@@ -14,7 +16,7 @@
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
 ;- implement main method
 ;- try to implement "interface" that promisses input/outputs (if any) 
-;- "canMove" method needs to consider world boundaries (NULL POINT... -.-") 
+
 
 patches-own [
              patchID    ; a simple counter for all patches to be numbered starts with 1
@@ -43,6 +45,10 @@ globals [
   curCol
   curRow
   
+  BrickColor
+  BGColor
+
+  
   
   selectedUnit  ;the selected unit choosen to allow to move
 
@@ -50,27 +56,31 @@ globals [
 
 ;-----------------------------------------------------------------------------------------
 to init
-  
+    ;clear the world
     clear-patches 
     
-    set patchIDcounter 1;
-    
+
+    ;set up PUBLIC variables
     set WorldRowCount 16 ;
     set WorldColCount 16 ; the dimensions of the non-wrapping world
-    
+    set BrickColor  red
+    set BGColor  blue
+
+    ;set up PRIVATE variables
     set groupIdCounter 0 ;reset the groupcounter
     set isfirtsredfound false;
-    
-    set curRow 16
+    set patchIDcounter 1;
+    set curRow WorldRowCount
 
     initrow
   
 end
 
+
 ;-----------------------------------------------------------------------------------------
 to initrow
   
-      set curCol  -17
+      set curCol  (- WorldRowCount - 1)
   
 end
 
@@ -79,21 +89,23 @@ to genmap
   
   init
   
-; set BG to blue
-  ask patches [set pcolor blue] 
+; set BG to BGColor
+  ask patches [set pcolor BGColor] 
   
 ;generate a random map, so I can play with it =)
+  ask n-of filling_level patches [set pcolor BrickColor]
   
-  let i -17
-  loop 
-  [
-    set  i i + 1
-    ask patch random-pxcor random-pycor [set pcolor red]
-    
-    if i = filling_level [ stop ]
-   ]
+;*  let i (- WorldRowCount - 1)
+;*  loop 
+;*  [
+;*    set  i i + 1
+;*    ask patch random-pxcor random-pycor [set pcolor BrickColor]
+;*    
+;*    if i = filling_level [ stop ]
+;*   ]
   
 end
+
 
 
 
@@ -102,9 +114,9 @@ end
 to formUnits
   
   ;; form the first row (call method)
-  set curCol -17
-  let i -16
-  while [ i < 17]
+  set curCol (- WorldColCount - 1)
+  let i  (- WorldColCount)
+  while [ i < (WorldColCount + 1)]
   [
 
     firstRow
@@ -115,14 +127,14 @@ to formUnits
    
    
   ;; form the other rows (call method)  
-  let j -16 
+  let j (- WorldColCount)
 
-  while [ j < 17]  
+  while [ j < (WorldColCount + 1)]  
   [
     
   
-  set i -16
-  while [ i < 17]
+  set i (- WorldRowCount)
+  while [ i < (WorldRowCount + 1)]
   [
     secRow
     set  i (i + 1)
@@ -140,6 +152,7 @@ buildUnitIDList
 end
 
 
+
 ;-----------------------------------------------------------------------------------------
 to firstRow
 
@@ -148,7 +161,7 @@ to firstRow
   
   
   
-      if curCol = 17 [ initrow set curRow curRow - 1 stop ]
+      if curCol = (WorldColCount + 1) [ initrow set curRow curRow - 1 stop ]
 
 
     ask patch curCol curRow 
@@ -158,15 +171,15 @@ to firstRow
          set patchIDcounter patchIDcounter + 1
          
          ;check if patch is a Brick or not
-         ifelse pcolor = red [ 
+         ifelse pcolor = BrickColor [ 
                                if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 2 set isfirtsredfound true]
                                
                                if groupID = 0[ set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]
                                
                                set plabel groupID
                                
-                               if curCol != 16 [ask patch (curCol + 1) curRow [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]]] ;ask ahead but not in the last Col
-                               ;ask patch curCol (curRow - 1) [if pcolor = red [ set groupID [groupID] of patch curCol curRow  set plabel groupID]] ;ask below
+                               if curCol != (WorldColCount) [ask patch (curCol + 1) curRow [if pcolor = BrickColor [ set groupID [groupID] of patch curCol curRow  set plabel groupID]]] ;ask ahead but not in the last Col
+                               ;ask patch curCol (curRow - 1) [if pcolor = BrickColor [ set groupID [groupID] of patch curCol curRow  set plabel groupID]] ;ask below
                                
                               ]
          
@@ -180,7 +193,7 @@ end
 ;-----------------------------------------------------------------------------------------
 to secRow
   set curCol curCol + 1
-      if curCol = 17 [ initrow set curRow curRow - 1 stop ]
+      if curCol = (WorldColCount + 1) [ initrow set curRow curRow - 1 stop ]
   
   let rowAboveBrick  false;
 
@@ -192,7 +205,7 @@ to secRow
          set patchIDcounter patchIDcounter + 1
          
          ;check if patch is a Brick or not
-         ifelse pcolor = red [ 
+         ifelse pcolor = BrickColor [ 
                                
                                
                                ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1)  set rowAboveBrick  true] ;ask above
@@ -200,8 +213,8 @@ to secRow
                                set plabel groupID
                                
                                
-                              if curCol != -16 [ask patch (curCol - 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask behind, except in the first col
-                              if curCol != 16  [ask patch (curCol + 1) curRow [if (pcolor = red) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask ahead, except the last col
+                              if curCol != (- WorldColCount) [ask patch (curCol - 1) curRow [if (pcolor = BrickColor) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask behind, except in the first col
+                              if curCol != (WorldColCount)  [ask patch (curCol + 1) curRow [if (pcolor = BrickColor) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow set plabel groupID  ]]] ;ask ahead, except the last col
                                
                               ]
          
@@ -211,6 +224,7 @@ to secRow
         ]
     
 end
+
 
 ;-----------------------------------------------------------------------------------------
 to buildUnitIDList
@@ -233,6 +247,10 @@ end
 
 ;; method to pick a random unit (will return the groupID)
 to pickOneUnit
+  
+;from the 2nd instance, set the previously picked unit back the the BGColor
+ifelse (selectedUnit = 0) [][ask patches with [groupID = selectedUnit] [set pcolor BrickColor]]
+
   
 set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of groups
 print selectedUnit
@@ -319,7 +337,10 @@ to canMove
   while [(i < length unitMemberList)] ; loop ends if all members report true, or one member reports false
   [
     ;check for world boundaries
-    ask patches with [patchID = item i unitMemberList] [ if ( ((pxcor + moveColDiff) < -16) or ((pxcor + moveColDiff) > 16) or ((pycor + moveRowDiff) < -16) or ((pycor + moveRowDiff) > 16)) [set canUnitMove false]]
+    ;*ask patches with [patchID = item i unitMemberList] [ if ( ((pxcor + moveColDiff) < -16) or ((pxcor + moveColDiff) > 16) or ((pycor + moveRowDiff) < -16) or ((pycor + moveRowDiff) > 16)) [set canUnitMove false]]
+      ask patches with [patchID = item i unitMemberList] [ if ((((pxcor + moveColDiff) < (- WorldColCount)) or((pxcor + moveColDiff) > (WorldColCount))) or (((pycor + moveRowDiff) < (- WorldRowCount)) or((pycor + moveRowDiff) > (WorldRowCount)))) [set canUnitMove false]]
+
+    
     
     if (canUnitMove = true)
     [
