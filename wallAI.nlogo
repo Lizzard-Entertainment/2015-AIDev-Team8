@@ -16,7 +16,7 @@
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
 ;- implement main method
 ;- try to implement "interface" that promisses input/outputs (if any) 
-
+;- fix bugs
 
 patches-own [
              patchID    ; a simple counter for all patches to be numbered starts with 1
@@ -256,8 +256,6 @@ set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of
 print selectedUnit
 ask patches with [groupID = selectedUnit] [set pcolor green]
   
-  decideIfMoving
-  decideUnitMovingDirection
   
 end
 
@@ -382,9 +380,56 @@ to doMove
   ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
   
  ask patches with [pcolor = pink] [ set pcolor red set groupID selectedUnit set plabel groupID]
- ask patches with [groupID = 0] [set pcolor blue set plabel ""]
+ ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor blue set plabel ""]
   
 end
+
+
+
+
+;; a method to tie together the 3 methods: decideUnitMovingDirection ,canMove ,doMove
+;-----------------------------------------------------------------------------------------
+
+to moveUnit
+
+let failedDir []
+let exitloop false
+
+  ;pick a random unit
+  pickOneUnit
+   
+   ;wait 2
+   
+  ;see if they want to move
+  decideIfMoving
+  
+  ;vote for a direction
+  decideUnitMovingDirection
+  
+
+  
+  while [exitloop = false]
+  [
+    
+   ;vote for a direction
+   decideUnitMovingDirection
+    
+   ;see if it's a valid move
+   canMove
+   
+   ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir ]  ] 
+   if (length failedDir = 4) [print "NO VALID MOVE !!!!!!" ask patches with [groupID = selectedUnit] [set pcolor orange] set exitloop true]
+   
+  ]
+  
+  if (length failedDir != 4)
+  [
+    ;move there
+    doMove
+  ]
+  
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -407,8 +452,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -600,6 +645,23 @@ BUTTON
 NIL
 doMove
 NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+73
+481
+156
+514
+NIL
+moveUnit
+T
 1
 T
 OBSERVER
