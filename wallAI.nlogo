@@ -316,10 +316,10 @@ to canMove
   
 
   ; while: If reporter reports false, exit the loop. Otherwise run commands and repeat. 
-  while [(i < length unitMemberList) or (canUnitMove = false)] ; loop ends if all members report true, or one member reports false
+  while [(i < length unitMemberList)] ; loop ends if all members report true, or one member reports false
   [
     ;check for world boundaries
-    ask patches with [patchID = item i unitMemberList] [ if ((((pxcor + moveColDiff) < -16) or((pxcor + moveColDiff) > 16)) or (((pycor + moveRowDiff) < -16) or((pycor + moveRowDiff) > 16))) [set canUnitMove false]]
+    ask patches with [patchID = item i unitMemberList] [ if ( ((pxcor + moveColDiff) < -16) or ((pxcor + moveColDiff) > 16) or ((pycor + moveRowDiff) < -16) or ((pycor + moveRowDiff) > 16)) [set canUnitMove false]]
     
     if (canUnitMove = true)
     [
@@ -360,22 +360,10 @@ to doMove
   
   ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
   
-  
-  ;*ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
-  
-
-
- ;* while [i < length unitMemberList]
- ;* [
- ;*   ask patches with [patchID = item i unitMemberList] [ set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]];set groupID selectedUnit]]    
- ;*   set i i + 1
- ;* ]
-  
  ask patches with [pcolor = pink] [ set pcolor red set groupID selectedUnit set plabel groupID]
  ask patches with [groupID = 0] [set pcolor blue set plabel ""]
   
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
