@@ -37,7 +37,8 @@ globals [
   
   UnitIDList             ;list of existing UnitIDs
   UnitMovingDir          ;agreed direction of Unit movement
-  canUnitMove            ;is selected Unit free to move to the agreed movement
+  canUnitMove            ;is selected Unit free to move to the agreed movement?
+  UnitWantsMove          ;is selected Unit wants to move at all?
   
   WorldRowCount
   WorldColCount
@@ -71,6 +72,8 @@ to init
     set isfirtsredfound false;
     set patchIDcounter 1;
     set curRow WorldRowCount
+    
+    set UnitWantsMove false
 
     initrow
   
@@ -270,7 +273,7 @@ to decideIfMoving
 
   print AVG
   
-  ifelse (AVG >= X) [print "to infinity, and beyound!!!"] [] ;check if more Bricks than X wants to move or not
+  ifelse (AVG >= X) [print "to infinity, and beyound!!!" set UnitWantsMove true] [ set UnitWantsMove false] ;check if more Bricks than X wants to move or not
   
 end
 
@@ -379,7 +382,7 @@ to doMove
   
   ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
   
- ask patches with [pcolor = pink] [ set pcolor red set groupID selectedUnit set plabel groupID]
+ ask patches with [pcolor = pink] [ set pcolor BrickColor set groupID selectedUnit set plabel groupID]
  ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor blue set plabel ""]
   
 end
@@ -403,33 +406,37 @@ let exitloop false
   ;see if they want to move
   decideIfMoving
   
-  ;vote for a direction
-  decideUnitMovingDirection
-  
-
-  
-  while [exitloop = false]
+  if (UnitWantsMove = true)
   [
     
-   ;vote for a direction
-   decideUnitMovingDirection
+    ;vote for a direction
+    decideUnitMovingDirection
     
-   ;see if it's a valid move
-   canMove
-   
-   ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir ]  ] 
-   if (length failedDir = 4) [print "NO VALID MOVE !!!!!!" ask patches with [groupID = selectedUnit] [set pcolor orange] set exitloop true]
-   
-  ]
-  
-  if (length failedDir != 4)
-  [
-    ;move there
-    doMove
+    
+    
+    while [exitloop = false]
+    [
+      
+      ;vote for a direction
+      decideUnitMovingDirection
+      
+      ;see if it's a valid move
+      canMove
+      
+      ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir ]  ] 
+      if (length failedDir = 4) [print "NO VALID MOVE !!!!!!" ask patches with [groupID = selectedUnit] [set pcolor orange] set exitloop true]
+      
+    ]
+    
+    if (length failedDir != 4)
+    [
+      ;move there
+      doMove
+    ]
+    
   ]
   
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -582,7 +589,7 @@ Y
 Y
 51
 100
-59
+51
 1
 1
 NIL
