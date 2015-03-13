@@ -16,8 +16,7 @@ globals [
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   isPlayerCaught
-  isPlayerDetected
-  
+  isPlayerDetected 
 ]
 
 
@@ -29,12 +28,12 @@ enemies-own [energy]
 to setup
   ;;Initialise world
   clear-all
-  import-world "TestWorld2.csv"
+  import-world "TestWorld3.csv"
   
   ;;Create enemies
   create-enemies 1 
   [
-    setxy -9 -9
+    setxy -17 -17
      set heading 0
      set energy 100
   ]
@@ -42,7 +41,7 @@ to setup
   ;;Create players
   create-players 1 
   [
-    setxy -1 -2 set heading 0
+    setxy 5 -4 set heading 0
   ]  
   
   reset-ticks
@@ -58,6 +57,7 @@ to updateEnemies
       [
         ;;CATCH STATE.
         print "Player caught"
+        user-message "Player Caught!";
       ]
       [
         ;;SEEK STATE.
@@ -167,10 +167,10 @@ end
 GRAPHICS-WINDOW
 210
 10
-493
-314
-10
-10
+701
+522
+18
+18
 13.0
 1
 10
@@ -181,10 +181,10 @@ GRAPHICS-WINDOW
 1
 1
 1
--10
-10
--10
-10
+-18
+18
+-18
+18
 0
 0
 1
