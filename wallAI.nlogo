@@ -8,7 +8,7 @@
 ;
 ;
 ;; BUGs::
-; - if unit can't move in any direction, it can't reset out from the loop
+
 
 
 ;;TO-DOs
@@ -40,6 +40,8 @@ globals [
   canUnitMove            ;is selected Unit free to move to the agreed movement?
   UnitWantsMove          ;is selected Unit wants to move at all?
   
+  UnitMoveCounter        ;how much move happened overall
+  
   WorldRowCount
   WorldColCount
 
@@ -55,10 +57,13 @@ globals [
 
          ]
 
+;;a method to initialise and set up the global variables
 ;-----------------------------------------------------------------------------------------
 to init
     ;clear the world
     clear-patches 
+    reset-ticks
+    set UnitMoveCounter 0
     
 
     ;set up PUBLIC variables
@@ -80,13 +85,8 @@ to init
 end
 
 
-;-----------------------------------------------------------------------------------------
-to initrow
-  
-      set curCol  (- WorldRowCount - 1)
-  
-end
-
+;;;M1
+;;method to generate a random map
 ;-----------------------------------------------------------------------------------------
 to genmap
   
@@ -98,21 +98,12 @@ to genmap
 ;generate a random map, so I can play with it =)
   ask n-of filling_level patches [set pcolor BrickColor]
   
-;*  let i (- WorldRowCount - 1)
-;*  loop 
-;*  [
-;*    set  i i + 1
-;*    ask patch random-pxcor random-pycor [set pcolor BrickColor]
-;*    
-;*    if i = filling_level [ stop ]
-;*   ]
-  
 end
 
 
 
-
-
+;;;M2
+;;method to find neighbouring bricks, and form Units with them
 ;-----------------------------------------------------------------------------------------
 to formUnits
   
@@ -147,15 +138,15 @@ to formUnits
   set  j (j + 1)
   ]
     
-    
+;######################################################    
 ;;call method to generate a valid groupIDlist  
 buildUnitIDList
   
   
 end
 
-
-
+;;;M2.1
+;;method to form units in the first row
 ;-----------------------------------------------------------------------------------------
 to firstRow
 
@@ -193,6 +184,8 @@ to firstRow
   
 end
 
+;;;M2.2
+;;method to form Units in every additional row
 ;-----------------------------------------------------------------------------------------
 to secRow
   set curCol curCol + 1
@@ -229,6 +222,20 @@ to secRow
 end
 
 
+;;;M2.1.1
+;;method to reset the col number in the end of every row
+;-----------------------------------------------------------------------------------------
+to initrow
+  
+      set curCol  (- WorldRowCount - 1)
+  
+end
+
+
+
+
+;;;M3
+;; a method to build a list of valid Unit IDs
 ;-----------------------------------------------------------------------------------------
 to buildUnitIDList
 
@@ -248,7 +255,11 @@ show UnitIDList
 
 end
 
-;; method to pick a random unit (will return the groupID)
+
+
+;;;M4.1
+;; method to pick a random unit
+;-----------------------------------------------------------------------------------------
 to pickOneUnit
   
 ;from the 2nd instance, set the previously picked unit back the the BGColor
@@ -262,6 +273,7 @@ ask patches with [groupID = selectedUnit] [set pcolor green]
   
 end
 
+;;;M4.2
 ;;method to find out if Bricks wants to move more than X or not
 ;-----------------------------------------------------------------------------------------
 to decideIfMoving
@@ -277,7 +289,7 @@ to decideIfMoving
   
 end
 
-
+;;;M4.3
 ;;method to find out which way Bricks wants to go   [0=left|1=up|2=right|3=down]
 ;-----------------------------------------------------------------------------------------
 to decideUnitMovingDirection
@@ -311,10 +323,10 @@ print UnitMovingDir
  
 end
 
+;;;M4.4
 ;; a method to see if the selected Unit can move in the selected direction
 ;; FOR A UNIT TO BE ABLE TO MOVE TO A DIRECTION, LOCATIONS TO ALL BRICKS CURRENT LOC. +1 IN THE MOVING DIRECTIONS HAS TO HAVE EITHER THE UNIT ID, OR 0 (EMPTY)
 ;-----------------------------------------------------------------------------------------
-
 to canMove
   
   let i  0
@@ -360,9 +372,9 @@ to canMove
 end
 
 
+;;;M4.5
 ;; a method to physically move the selected unit, if the movement is AUTOHISED by "canMove" method
 ;-----------------------------------------------------------------------------------------
-
 to doMove
   
   let i  0
@@ -382,15 +394,17 @@ to doMove
   
   ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
   
- ask patches with [pcolor = pink] [ set pcolor BrickColor set groupID selectedUnit set plabel groupID]
- ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor blue set plabel ""]
+  ask patches with [pcolor = pink] [ set pcolor BrickColor set groupID selectedUnit set plabel groupID]
+  ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor blue set plabel ""]
+  
+  set  UnitMoveCounter UnitMoveCounter + 1
   
 end
 
 
 
-
-;; a method to tie together the 3 methods: decideUnitMovingDirection ,canMove ,doMove
+;;;M4
+;; a method to tie together the 5 methods: pickOneUnit, decideIfMoving, decideUnitMovingDirection ,canMove ,doMove
 ;-----------------------------------------------------------------------------------------
 
 to moveUnit
@@ -677,6 +691,28 @@ NIL
 NIL
 NIL
 1
+
+MONITOR
+867
+364
+971
+409
+Genrated Units
+length UnitIDList
+0
+1
+11
+
+MONITOR
+871
+436
+976
+481
+Total Unit Moves
+UnitMoveCounter
+0
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
