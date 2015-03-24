@@ -41,6 +41,7 @@ globals [
   UnitWantsMove          ;is selected Unit wants to move at all?
   
   UnitMoveCounter        ;how much move happened overall
+  TurnCounter            ;how much move could had happened (if 100% move)
   
   WorldRowCount
   WorldColCount
@@ -56,7 +57,7 @@ globals [
   selectedUnit  ;the selected unit choosen to allow to move
 
          ]
-
+;;;M1.2
 ;;a method to initialise and set up the global variables
 ;-----------------------------------------------------------------------------------------
 to init
@@ -64,7 +65,9 @@ to init
     clear-patches 
     reset-ticks
     set UnitMoveCounter 0
-    
+    set TurnCounter 0
+    clear-all-plots 
+    clear-globals 
 
     ;set up PUBLIC variables
     set WorldRowCount 16 ;
@@ -410,6 +413,8 @@ end
 ;-----------------------------------------------------------------------------------------
 
 to moveUnit
+  
+set TurnCounter TurnCounter + 1
 
 let failedDir []
 let exitloop false
@@ -565,10 +570,10 @@ NIL
 1
 
 BUTTON
-63
-265
-160
-298
+996
+109
+1093
+142
 NIL
 pickOneUnit
 NIL
@@ -590,7 +595,7 @@ X
 X
 0
 10
-3
+5
 1
 1
 NIL
@@ -716,10 +721,29 @@ UnitMoveCounter
 1
 11
 
+PLOT
+1001
+342
+1201
+492
+Moving precentige
+totat moving opportunity
+actual move counter
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot ((UnitMoveCounter / (TurnCounter)) * 100)"
+
 @#$#@#$#@
 ## WHAT IS IT?
 
 (a general understanding of what the model is trying to show or explain)
+This Model emulates a basic artificial life environment, where a random map is generated and thereafter Units are formed. Then the Units try to move around the world restrained by rules.
 
 ## HOW IT WORKS
 
