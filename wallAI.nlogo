@@ -138,7 +138,6 @@ to formUnits
   set  j (j + 1)
   ]
     
-;######################################################    
 ;;call method to generate a valid groupIDlist  
 buildUnitIDList
   
@@ -234,7 +233,7 @@ end
 
 
 
-;;;M3
+;;;M2.3
 ;; a method to build a list of valid Unit IDs
 ;-----------------------------------------------------------------------------------------
 to buildUnitIDList
@@ -269,7 +268,8 @@ ifelse (selectedUnit = 0) [][ask patches with [groupID = selectedUnit] [set pcol
 set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of groups
 print selectedUnit
 ask patches with [groupID = selectedUnit] [set pcolor green]
-  
+
+tick  
   
 end
 
@@ -399,6 +399,8 @@ to doMove
   
   set  UnitMoveCounter UnitMoveCounter + 1
   
+  tick
+  
 end
 
 
@@ -473,8 +475,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -588,7 +590,7 @@ X
 X
 0
 10
-6
+3
 1
 1
 NIL
