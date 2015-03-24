@@ -15,6 +15,7 @@ globals [
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+  GameStarted
   isPlayerCaught
   isPlayerDetected 
 ]
@@ -25,10 +26,15 @@ breed [players player ]
 
 enemies-own [energy]
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;BASE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 to setup
   ;;Initialise world
   clear-all
   import-world "TestWorld3.csv"
+  set GameStarted false
   
   ;;Create enemies
   create-enemies 1 
@@ -47,7 +53,94 @@ to setup
   reset-ticks
 end
 
-to updateEnemies
+to baseUpdate
+  
+  set GameStarted true
+  updateEnemy
+  tick
+  
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PLAYER
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to move_up  
+  
+  ;look forward. 
+  if GameStarted
+  [
+    ask players [ 
+      set heading 0 
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        forward 1
+      ]  
+    ]
+  ]
+end
+
+to move_right
+  
+  ;Turn right
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 90
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        forward 1
+      ] 
+    ]
+  ]
+end
+
+to move_down
+  
+  ;Look backwards
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 180 
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        forward 1
+      ] 
+    ]
+  ]
+end
+
+to move_left
+  
+  ;look left
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 270
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        forward 1
+      ] 
+    ]
+  ]
+  
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to updateEnemy
   ask enemies
   [
     ;;check for player
@@ -84,6 +177,8 @@ to updateEnemies
     
     show "-------------------------------------------------------------------------------------------------------"
   ]
+  
+  wait 0.1
 end
 
 to Wander
@@ -140,7 +235,7 @@ end
 to-report canSeePlayer
   
   ;;Check for a player on the patches in a cone of radius 90, length 5.
-  if any? players-on patches in-cone 5 90
+  if any? players-on patches in-cone 5 1
   [
     set isPlayerDetected true
     report true
@@ -185,8 +280,8 @@ GRAPHICS-WINDOW
 18
 -18
 18
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -214,7 +309,7 @@ BUTTON
 163
 143
 Move
-updateEnemies
+baseUpdate
 T
 1
 T
@@ -246,13 +341,81 @@ BUTTON
 164
 180
 Step
-updateEnemies
+baseUpdate
 NIL
 1
 T
 OBSERVER
 NIL
 NIL
+NIL
+NIL
+1
+
+BUTTON
+883
+138
+968
+171
+Player Up
+move_up
+NIL
+1
+T
+OBSERVER
+NIL
+W
+NIL
+NIL
+1
+
+BUTTON
+875
+269
+976
+302
+Player Down
+move_down
+NIL
+1
+T
+OBSERVER
+NIL
+S
+NIL
+NIL
+1
+
+BUTTON
+765
+203
+857
+236
+Player Left
+move_left
+NIL
+1
+T
+OBSERVER
+NIL
+A
+NIL
+NIL
+1
+
+BUTTON
+988
+209
+1086
+242
+Player Right
+move_right
+NIL
+1
+T
+OBSERVER
+NIL
+D
 NIL
 NIL
 1
