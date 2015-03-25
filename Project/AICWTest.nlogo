@@ -13,27 +13,32 @@ globals [
   next-bonus-in ;; time until next bonus is created
   tool which-ghost ;; variables needed to properly load levels 4 and above.
   
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  ALL THESE ABOVE GLOBALS CAN GO.  THEY'RE ONLY HERE BECAUSE THE PACMAN LEVEL EDITOR DEMANDS THEM.
 
-  GameStarted
-  isPlayerCaught
-  isPlayerDetected 
+  GameStarted          ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
 ]
 
 
 breed [enemies enemy ]
 breed [players player ]
 
-enemies-own [energy]
+enemies-own 
+[
+  state            ;;Enemy state 
+  energy          ;;Energy is an integer value representing the energy.
+  isResting       ;;isResting is a boolean flag indicating the enemy is in the regenerating part of the resting state.
+]
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;BASE
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to setup
   ;;Initialise world
   clear-all
   import-world "TestWorld3.csv"
+  
+  ;;Initialise variables
   set GameStarted false
   
   ;;Create enemies
@@ -42,6 +47,8 @@ to setup
     setxy -17 -17
      set heading 0
      set energy 100
+     set isResting false
+     set state ""
   ]
   
   ;;Create players
@@ -56,14 +63,15 @@ end
 to baseUpdate
   
   set GameStarted true
-  updateEnemy
+  updateEnemyState
   tick
+  wait 0.1
   
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;PLAYER
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to move_up  
   
@@ -138,125 +146,183 @@ to move_left
 end
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;ENEMY
+;ENEMY STATE CONTROL METHOD
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-to updateEnemy
+
+to updateEnemyState
   ask enemies
   [
-    ;;check for player
-    ifelse canSeePlayer
-    [
-      ifelse canCatchPlayer
+    ;;We need to check if we can act.
+    ;;If not, then it will need to rest.
+    ifelse canAct
+    [     
+      ;;If we can act, the enemy does not need to rest.  Therefore, we set the flat appropritely here.
+      set isResting false
+      
+      ;;In the wander state, we can seek if we can act and can seek.
+      ifelse canSeek
       [
-        ;;CATCH STATE.
-        print "Player caught"
-        user-message "Player Caught!";
-      ]
-      [
-        ;;SEEK STATE.
-        print "Player Detected"  
+        ;;Switch to Seek state when we can act and canseek.
+        SeekState
         
-        ifelse energy > 0 
+        ;;In the seek state, we can catch if we can act and can catch
+        if canCatch
         [
-          ;;If the enemy has energy, decrement it.
-          set energy energy - 1
-        ]
-        [
-          ;;If the enemy runs out of energy, go wandering.
-          Wander
-        ]
+          ;;Switch to Catch state when we can act and can catch
+          CatchState
+        ]        
       ]
+      [
+        ;;Switch to Wander state when we have more than 25 energy and cannot seek.
+        WanderState
+      ]      
     ]
     [
-      ;;WANDER STATE.
-      Wander
-    ]
-    
-    write "Energy: "
-    print energy
-    
-    show "-------------------------------------------------------------------------------------------------------"
-  ]
-  
-  wait 0.1
+      ;;Switch to Rest state when we can't act.
+      RestState
+    ]    
+  ]  
 end
 
-to Wander
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY STATE METHODS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to WanderState
+    
+  ;;Update State
+  set state "WANDER STATE"
   
-  ;;move forward
-  forward 1        
-        
-  ;;regenerate energy
-  if energy < 100 [set energy energy + 1]
-      
-  ;;declare list.
+  ;;Move forward if the enemy has energy
+  forward 1
+       
+  ;;Regenerate energy quickly
+  if energy < 100 [set energy energy + 2]
+  
+  ;;If we regenerate too much energy, set energy to 100
+  if energy > 100 [ set energy 100 ]
+  
+  ;;Declare list.
   let directions[]
   
-  ;;turn around if local walls are blue
+  ;;Turn around if local walls are blue
   ifelse [pcolor] of patch-ahead 1 = blue and [pcolor] of patch-right-and-ahead 90 1 = blue and [pcolor] of patch-left-and-ahead 90 1 = blue
   [
     set directions lput 180 directions
   ]
   
-  ;otherwise do the pathing stuff.
+  ;Otherwise do the pathing stuff.
   [   
-    ;;check infront
+    ;;Check infront
     if [pcolor] of patch-ahead 1 = black
     [
       set directions lput 0 directions
     ]
     
-    ;;check to the right
+    ;;Check to the right
     if [pcolor] of patch-right-and-ahead 90 1 = black
     [
       set directions lput 90 directions
     ]
     
-    ;;check to the left
+    ;;Check to the left
     if [pcolor] of patch-left-and-ahead 90 1 = black
     [
       set directions lput -90 directions
     ]    
   ]
   
-  ;;returns a random number between 0 and the list max minus 1. 
-  ;;For example, if only forward and right were options, the list would contain 2 elemenets.  0, and 1.
-  ;;randomly return an index of this list to return a value, either right or forward.
+  ;;Returns a random number between 0 and the list max minus 1. 
+  ;;For example, if only forward and right were options, the list would contain 2 elements.  0, and 1.
+  ;;Randomly return an index of this list to return a value, either right or forward.
   let value random (length directions)
   
   ;;Change direction
   set heading heading + item value directions 
   
-  write "Heading: "
-  show heading
+end
+
+to SeekState
+  
+  ;;Update State
+  set state "SEEK STATE" 
+  
+  ;;If the enemy has energy, decrement it.
+  set energy energy - 1
   
 end
 
-to-report canSeePlayer
+to CatchState
   
-  ;;Check for a player on the patches in a cone of radius 90, length 5.
-  if any? players-on patches in-cone 5 1
+  ;;Update State
+  set state "CATCH STATE"
+  
+  ;;Display message.
+  user-message "Player caught!"
+  
+end
+
+to RestState
+  
+  ;;Update State
+  set state "REST STATE"
+  
+  ;;zero energy if not already resting            
+  ifelse isResting = false
+  [ 
+    ;;Zero energy and take a nap.
+    set energy 0 
+    
+    ;;Set resting flag
+    set isResting true
+  ]
   [
-    set isPlayerDetected true
-    report true
+    ;;Regenerate energy
+    set energy energy + 1  
   ]
   
-  report false
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY CHECK METHODS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report canSeek
+  
+  ;;Check for a player on the patches in a cone of radius 1, length 5.
+  ifelse any? players-on patches in-cone 5 1
+  [
+    report true
+  ]
+  [  
+    report false
+  ]
   
 end
 
-to-report canCatchPlayer
+to-report canCatch
   
   ;;If the player is right infront of the enemy, catch them like a fish.
   ifelse any? players-on patch-ahead 1
   [
-    set isPlayerCaught true
     report true
   ]
   [
     report false
   ]
     
+end
+
+to-report canAct
+  
+  ;;If the enemy has less than 25 energy, it can't do anything and must rest.
+  ifelse energy > 25 
+  [
+   report true 
+  ]
+  [
+    report false
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -273,8 +339,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-1
-1
+0
+0
 1
 -18
 18
@@ -334,23 +400,6 @@ DIFFICULTY
 1
 NIL
 HORIZONTAL
-
-BUTTON
-40
-147
-164
-180
-Step
-baseUpdate
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-1
 
 BUTTON
 883
@@ -420,42 +469,98 @@ NIL
 NIL
 1
 
+MONITOR
+37
+180
+166
+225
+Current Enemy State
+[ state ] of enemy 2
+17
+1
+11
+
+MONITOR
+36
+238
+168
+283
+Enemy Energy
+[energy] of enemy 2
+17
+1
+11
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+### The Simulation
+This model demonstates the enemy's state switching, and the softer maze navigation for the enemy and the player.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+### States
+The enemy has 4 underlying states: Wander, Seek, Catch, and Rest.
+
+These states are entered and exited under certain conditions in the simulation.
+
+#### Wander
+The Wander state is the "entry state" where the enemy randomly navigates the maze.
+
+#### Seek
+The enemy transitions from Wander to the Seek state when it can see the player.
+
+#### Catch
+The enemy transitions from Seek to the Catch state when it is close to the player.
+
+#### Rest
+The enemy will finally transition to the Rest state when it is exhausted.  It can enter the Rest from any other state.
+
+### Energy
+#### The Resource
+All enemies use a resource called Energy to determine state changes.  
+
+#### Exhausting
+In the Seek state, it will consume energy at a basic rate.  Once its energy resource drops low enough, it will become exhausted and enter the Rest state.
+
+#### Power Nap
+In the Rest state and in the Wander state, the enemy will regenerate energy.  
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+### The Interface
+#### Setting it up.
+Click Setup to initialise the simulation.
+
+#### Beginning the game.
+Clicking Move starts the simulation.  The player is user controlled, and the enemy will move on its own.
+
+#### Controlling The Player
+Clicking the buttons on the right of the display window will move the player according to the button's display name.
+
+#### Controlling The Player (Recommended)
+Use WASD to control the player.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
+### Insight
+The enemy's state and energy values are displayed in monitors.
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+### Let Sleeping Dogs Lie
+What happens when the player touches the enemy when it is resting?
+
+### Out For The Count
+Try to determine the energy threshold where the enemy is considered _exhausted_.
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+### Seek and Destroy
+The Seek method can be expanded with a custom search algorith.  The `canSeek` and `canCatch` methods will be helpful here.  Can you implement a search algorithm to make the enemy find and catch the player?
 
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+### Game Over
+The Catch method is the logical lose-condition for the player.  Can you implement a way to stop the game when the player is caught?
 @#$#@#$#@
 default
 true
