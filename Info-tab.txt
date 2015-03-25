@@ -1,0 +1,49 @@
+How it works?
+
+After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and tries to form Units with them.
+Units stay together for the rest of the game.
+After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement. Finally the Unit moves (if the movement is possible) and another Unit is selected...
+
+
+
+How to use it?
+
+First set the Filling level with the slider.
+Then generate a map.
+Form initial Units.
+Press moveUnits.
+
+Control the moving willingness with the X slider.
+Control the required direction agreement precentige with the Y slider.
+Control the extra vote Bricks get that wanted to move in the first place.
+
+'Generated Units' meter shows the number of individual Units currently on the map.
+'Total Unit Moves' shown the number of actual movements Units made so far
+'Moving precentige' shows the ratio between the total possible movements and actual movements Units made
+
+
+
+
+
+
+
+
+Wk 10 Wed.- class test
+wk 11 Wed.- AI presentation
+
+
+
+
+
+Ideas; 
+
+- add pickup that would change the tiles want to prefer a direction (set, like up/down/etc, OR away/to the player's location)
+- add functionality to Unit reFormation (Join/Split Units)
+/ they can "prefer" to join smaller/bigger/no prefference Units
+/ there will be a precentage for Join or not (one random no (on slider) for the whol Unit)
+/ Bricks vote to separate themselfs form their Units (and may join aother one if it's 1 tile away) (value on slider)
+
+"North-East"
+"North-West"
+"South-East"
+"South-West"
