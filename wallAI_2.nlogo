@@ -45,6 +45,7 @@ globals [
   
   UnitIDList             ;list of existing UnitIDs
   UnitMovingDir          ;agreed direction of Unit movement
+  validMovesList         ;list of valid moves
   canUnitMove            ;is selected Unit free to move to the agreed movement?
   UnitWantsMove          ;is selected Unit wants to move at all?
   
@@ -90,6 +91,8 @@ to init
     set curRow WorldRowCount
     
     set UnitWantsMove false
+    set validMovesList []
+
 
     initrow
   
@@ -307,16 +310,15 @@ to decideUnitMovingDirection
   
  set UnitMovingDir  -1 ; set to an invalid value
 
+ 
   
  while [UnitMovingDir < 0]
  [ 
   
-  ;*ask patches with [groupID = selectedUnit] [set movingDir random 4] ;assign a moovingDir value to each Brick 0-3
-
    ask patches with [groupID = selectedUnit] ;assign a moovingDir value to each Brick 0-3
    [
      
-     if (PreferedDirection = "none")[ set movingDir random 4]
+     if (PreferedDirection = "none")[ set movingDir one-of validMovesList]
      if (PreferedDirection = "North")[ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 1] [set movingDir random 4] ]
      if (PreferedDirection = "South")[ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 3] [set movingDir random 4] ]
      if (PreferedDirection = "East") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 0] [set movingDir random 4] ]
@@ -442,6 +444,9 @@ to moveUnit
 set TurnCounter TurnCounter + 1
 
 let failedDir []
+
+clearValidMovesList
+
 let exitloop false
 
   ;pick a random unit
@@ -456,7 +461,7 @@ let exitloop false
   [
     
     ;vote for a direction
-    decideUnitMovingDirection
+    ;decideUnitMovingDirection
     
     
     
@@ -469,7 +474,7 @@ let exitloop false
       ;see if it's a valid move
       canMove
       
-      ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir ]  ] 
+      ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir       set validMovesList remove UnitMovingDir validMovesList ]   ] 
       if (length failedDir = 4) [print "NO VALID MOVE !!!!!!" ask patches with [groupID = selectedUnit] [set pcolor orange] set exitloop true]
       
     ]
@@ -481,6 +486,28 @@ let exitloop false
     ]
     
   ]
+  
+end
+
+
+
+;;;M4.6
+;; a method to reset the validMovesList
+;-----------------------------------------------------------------------------------------
+to clearValidMovesList
+  
+  ;clear validlist
+  while [(length validMovesList) > 0]
+  [
+    set validMovesList remove-item 0 validMovesList  
+  ]
+  
+  ;refill it
+  set validMovesList fput 0 validMovesList
+  set validMovesList lput 1 validMovesList
+  set validMovesList lput 2 validMovesList
+  set validMovesList lput 3 validMovesList
+
   
 end
 @#$#@#$#@
@@ -505,8 +532,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -635,7 +662,7 @@ Y
 Y
 51
 100
-51
+79
 1
 1
 NIL
@@ -772,7 +799,7 @@ CHOOSER
 PreferedDirection
 PreferedDirection
 "none" "Close to Player" "Away from Player" "North" "South" "West" "East" "North-East" "North-West" "South-East" "South-West"
-7
+0
 
 SLIDER
 920
@@ -783,7 +810,7 @@ directionPreferenceIncluence
 directionPreferenceIncluence
 0
 90
-80
+90
 10
 1
 NIL
@@ -1151,7 +1178,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC3
+NetLogo 5.2-RC2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
