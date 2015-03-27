@@ -4,22 +4,18 @@
 ; notes: 
 ;       by default, patches get a groupID variable with the initial value of 0 !!!
 ;       word wrapping has to be disabled
-;       wall movement doesn't takes the player or enemy's into account, can just crush them
+;       wall movement doesn't takes the player or enemy's into account, can just crushes them
 ;
 ;
 ;; BUGs::
-;- prefered movingDir traps in loop, even if just 90% is there. direction ruleing out should be better
-
 
 ;;TO-DOs
 
-;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
-;- implement main method
 ;- try to implement "interface" that promisses input/outputs (if any) 
-;- fix bugs
 
 ;Ideas; 
 
+;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
 ;- add pickup that would change the tiles want to prefer a direction (set, like up/down/etc, OR away/to the player's location)
 ;- add functionality to Unit reFormation (Join/Split Units)
 ;/ they can "prefer" to join smaller/bigger/no prefference Units
@@ -264,7 +260,7 @@ ask patches with [(patchID = i)] [ if (groupID) != 0 [ ifelse(member? groupID Un
 set i i + 1  
 ]
 
-show UnitIDList
+if (DebugMSG) [show UnitIDList]
 
 end
 
@@ -280,7 +276,7 @@ ifelse (selectedUnit = 0) [][ask patches with [groupID = selectedUnit] [set pcol
 
   
 set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of groups
-print selectedUnit
+if (DebugMSG) [print selectedUnit]
 ask patches with [groupID = selectedUnit] [set pcolor green]
 
 tick  
@@ -297,9 +293,9 @@ to decideIfMoving
   set AVG sum [movingWill] of patches with [groupID = selectedUnit]
   set AVG AVG / count patches with [groupID = selectedUnit]
 
-  print AVG
+  if (DebugMSG) [print AVG]
   
-  ifelse (AVG >= X) [print "to infinity, and beyound!!!" set UnitWantsMove true] [ set UnitWantsMove false] ;check if more Bricks than X wants to move or not
+  ifelse (AVG >= X) [ if (DebugMSG) [print "to infinity, and beyound!!!"] set UnitWantsMove true] [ set UnitWantsMove false] ;check if more Bricks than X wants to move or not
   
 end
 
@@ -356,7 +352,7 @@ to decideUnitMovingDirection
      
  ]  
 
-print UnitMovingDir
+if (DebugMSG) [print UnitMovingDir]
  
 end
 
@@ -404,7 +400,7 @@ to canMove
   ]
   
   ;for DEBUGGING
- ifelse (canUnitMove = false)[print "can't go =("][ print "off we goooo =D"]
+ if (DebugMSG) [ifelse (canUnitMove = false)[print "can't go =("][ print "off we goooo =D"]]
   
 end
 
@@ -476,7 +472,7 @@ let exitloop false
       canMove
       
       ifelse (canUnitMove = true) [set exitloop true] [ set validMovesList remove UnitMovingDir validMovesList ]  
-      if (length validMovesList = 0) [print "NO VALID MOVE !!!!!!"  set exitloop true]
+      if (length validMovesList = 0) [if (DebugMSG) [print "NO VALID MOVE !!!!!!"]  set exitloop true]
       
     ]
     
@@ -572,10 +568,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-902
-19
-980
-52
+1397
+126
+1475
+159
 NIL
 firstRow
 T
@@ -589,10 +585,10 @@ NIL
 1
 
 BUTTON
-905
-62
-979
-95
+1400
+169
+1474
+202
 NIL
 secRow
 T
@@ -606,10 +602,10 @@ NIL
 1
 
 BUTTON
-68
-170
-153
-203
+67
+108
+152
+141
 NIL
 formUnits
 NIL
@@ -623,10 +619,10 @@ NIL
 1
 
 BUTTON
-996
-109
-1093
-142
+1378
+210
+1475
+243
 NIL
 pickOneUnit
 NIL
@@ -640,10 +636,10 @@ NIL
 1
 
 SLIDER
-22
-315
-194
-348
+24
+213
+196
+246
 X
 X
 0
@@ -655,10 +651,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-22
-363
-194
-396
+24
+261
+196
+294
 Y
 Y
 51
@@ -670,10 +666,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-23
-410
-195
-443
+25
+308
+197
+341
 braveBrickExtraVote
 braveBrickExtraVote
 100
@@ -685,10 +681,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-945
-188
-1055
-221
+1364
+292
+1474
+325
 NIL
 canMove
 NIL
@@ -702,10 +698,10 @@ NIL
 1
 
 BUTTON
-915
-151
-1092
-184
+1297
+252
+1474
+285
 NIL
 decideUnitMovingDirection
 NIL
@@ -719,10 +715,10 @@ NIL
 1
 
 BUTTON
-988
-248
-1063
-281
+1399
+335
+1474
+368
 NIL
 doMove
 NIL
@@ -736,10 +732,10 @@ NIL
 1
 
 BUTTON
-68
-255
-151
-288
+65
+157
+148
+190
 NIL
 moveUnit
 T
@@ -753,10 +749,10 @@ NIL
 1
 
 MONITOR
-23
-456
-107
-501
+25
+354
+109
+399
 Genrated Units
 length UnitIDList
 0
@@ -764,10 +760,10 @@ length UnitIDList
 11
 
 MONITOR
-121
-456
-226
-501
+123
+354
+228
+399
 Total Unit Moves
 UnitMoveCounter
 0
@@ -775,10 +771,10 @@ UnitMoveCounter
 11
 
 PLOT
-24
-513
-224
-663
+26
+411
+226
+561
 Moving precentige
 totat moving opportunity
 actual move counter
@@ -793,10 +789,10 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot ((UnitMoveCounter / (TurnCounter + 1)) * 100)"
 
 SLIDER
-920
-414
-1131
-447
+875
+79
+1086
+112
 directionPreferenceIncluence
 directionPreferenceIncluence
 10
@@ -808,14 +804,35 @@ NIL
 HORIZONTAL
 
 CHOOSER
-945
-317
-1083
-362
+903
+17
+1041
+62
 PreferedDirection
 PreferedDirection
 "none" "North" "South" "East" "West" "North-East" "North-West" "South-East" "South-West"
-6
+2
+
+SWITCH
+1358
+81
+1474
+114
+DebugMSG
+DebugMSG
+1
+1
+-1000
+
+TEXTBOX
+1356
+54
+1506
+73
+DEBUG SELECTION
+15
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
