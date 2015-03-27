@@ -315,7 +315,7 @@ to decideUnitMovingDirection
  while [UnitMovingDir < 0]
  [ 
   
-   ask patches with [groupID = selectedUnit] ;assign a moovingDir value to each Brick 0-3
+    ask patches with [groupID = selectedUnit] ;assign a moovingDir value to each Brick 0-3
    [
      
      if (PreferedDirection = "none")[ set movingDir one-of validMovesList]
@@ -323,13 +323,20 @@ to decideUnitMovingDirection
      if (PreferedDirection = "South")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 3 validMovesList)) [set movingDir 3] [set movingDir one-of validMovesList] ]
      if (PreferedDirection = "East") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 2 validMovesList)) [set movingDir 2] [set movingDir one-of validMovesList] ]
      if (PreferedDirection = "West") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 0 validMovesList)) [set movingDir 0] [set movingDir one-of validMovesList] ]
-    
-     ifelse ((PreferedDirection = "North-East") and ((member? 1 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
-     ifelse ((PreferedDirection = "North-West") and ((member? 1 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
-     ifelse ((PreferedDirection = "South-East") and ((member? 3 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
-     ifelse ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
-    
-    ] 
+
+
+     if ((PreferedDirection = "North-East") and ((member? 1 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "North-East") and ( not (member? 1 validMovesList) or  not (member? 2 validMovesList))) [set movingDir one-of validMovesList]
+
+     if ((PreferedDirection = "North-West") and ((member? 1 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "North-West") and ( not (member? 1 validMovesList) or not (member? 0 validMovesList))) [set movingDir one-of validMovesList]
+     
+     if ((PreferedDirection = "South-East") and ((member? 3 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "South-East") and ( not (member? 3 validMovesList) or  not (member? 2 validMovesList))) [set movingDir one-of validMovesList]
+     
+     if ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "South-West") and ( not (member? 3 validMovesList) or  not (member? 0 validMovesList))) [set movingDir one-of validMovesList]
+    ]
 
 
   let _left count patches with [(groupID = selectedUnit) and (movingDir = 0)]
@@ -558,7 +565,7 @@ filling_level
 filling_level
 0
 500
-467
+96
 1
 1
 NIL
@@ -785,16 +792,6 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot ((UnitMoveCounter / (TurnCounter + 1)) * 100)"
 
-CHOOSER
-931
-352
-1078
-397
-PreferedDirection
-PreferedDirection
-"none" "Close to Player" "Away from Player" "North" "South" "West" "East" "North-East" "North-West" "South-East" "South-West"
-7
-
 SLIDER
 920
 414
@@ -803,12 +800,22 @@ SLIDER
 directionPreferenceIncluence
 directionPreferenceIncluence
 10
-90
+100
 90
 10
 1
 NIL
 HORIZONTAL
+
+CHOOSER
+945
+317
+1083
+362
+PreferedDirection
+PreferedDirection
+"none" "North" "South" "East" "West" "North-East" "North-West" "South-East" "South-West"
+6
 
 @#$#@#$#@
 ## WHAT IS IT?
