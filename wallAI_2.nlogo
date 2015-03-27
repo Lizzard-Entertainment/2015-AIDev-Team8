@@ -92,7 +92,7 @@ to init
     
     set UnitWantsMove false
     set validMovesList []
-
+    
 
     initrow
   
@@ -319,15 +319,15 @@ to decideUnitMovingDirection
    [
      
      if (PreferedDirection = "none")[ set movingDir one-of validMovesList]
-     if (PreferedDirection = "North")[ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 1] [set movingDir random 4] ]
-     if (PreferedDirection = "South")[ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 3] [set movingDir random 4] ]
-     if (PreferedDirection = "East") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 0] [set movingDir random 4] ]
-     if (PreferedDirection = "West") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [set movingDir 2] [set movingDir random 4] ]
+     if (PreferedDirection = "North")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 1 validMovesList)) [set movingDir 1] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "South")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 3 validMovesList)) [set movingDir 3] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "East") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 2 validMovesList)) [set movingDir 2] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "West") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 0 validMovesList)) [set movingDir 0] [set movingDir one-of validMovesList] ]
     
-     if (PreferedDirection = "North-East") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir random 4] ]
-     if (PreferedDirection = "North-West") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir random 4] ]
-     if (PreferedDirection = "South-East") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 0]] [set movingDir random 4] ]
-     if (PreferedDirection = "South-West") [ ifelse ( random ((100 - directionPreferenceIncluence) / 10) = 0) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir random 4] ]  
+     ifelse ((PreferedDirection = "North-East") and ((member? 1 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
+     ifelse ((PreferedDirection = "North-West") and ((member? 1 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
+     ifelse ((PreferedDirection = "South-East") and ((member? 3 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
+     ifelse ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
     
     ] 
 
@@ -388,7 +388,7 @@ to canMove
     if (canUnitMove = true)
     [
     ;check for otherwise ok movement (other Units can be in the way)
-    ask patches with [patchID = item i unitMemberList] [ set pcolor yellow ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ ifelse((groupID = 0)or(groupID = selectedUnit)) [set pcolor black] [set canUnitMove false]]]    
+    ask patches with [patchID = item i unitMemberList] [ set pcolor yellow ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ ifelse((groupID = 0)or(groupID = selectedUnit)) [] [set canUnitMove false]]]    
     ]
     
     set i i + 1
@@ -443,8 +443,6 @@ to moveUnit
   
 set TurnCounter TurnCounter + 1
 
-let failedDir []
-
 clearValidMovesList
 
 let exitloop false
@@ -459,11 +457,7 @@ let exitloop false
   
   if (UnitWantsMove = true)
   [
-    
-    ;vote for a direction
-    ;decideUnitMovingDirection
-    
-    
+   
     
     while [exitloop = false]
     [
@@ -474,12 +468,12 @@ let exitloop false
       ;see if it's a valid move
       canMove
       
-      ifelse (canUnitMove = true) [set exitloop true] [ ifelse(member? UnitMovingDir failedDir) [] [ set failedDir lput UnitMovingDir failedDir       set validMovesList remove UnitMovingDir validMovesList ]   ] 
-      if (length failedDir = 4) [print "NO VALID MOVE !!!!!!" ask patches with [groupID = selectedUnit] [set pcolor orange] set exitloop true]
+      ifelse (canUnitMove = true) [set exitloop true] [ set validMovesList remove UnitMovingDir validMovesList ]  
+      if (length validMovesList = 0) [print "NO VALID MOVE !!!!!!"  set exitloop true]
       
     ]
     
-    if (length failedDir != 4)
+    if (length validMovesList != 0)
     [
       ;move there
       doMove
@@ -514,11 +508,11 @@ end
 GRAPHICS-WINDOW
 241
 10
-877
-667
+837
+627
 16
 16
-18.97
+17.76
 1
 10
 1
@@ -532,8 +526,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -662,7 +656,7 @@ Y
 Y
 51
 100
-79
+51
 1
 1
 NIL
@@ -799,7 +793,7 @@ CHOOSER
 PreferedDirection
 PreferedDirection
 "none" "Close to Player" "Away from Player" "North" "South" "West" "East" "North-East" "North-West" "South-East" "South-West"
-0
+7
 
 SLIDER
 920
@@ -808,7 +802,7 @@ SLIDER
 447
 directionPreferenceIncluence
 directionPreferenceIncluence
-0
+10
 90
 90
 10
