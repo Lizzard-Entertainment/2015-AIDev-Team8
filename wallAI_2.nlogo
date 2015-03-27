@@ -310,17 +310,16 @@ to decideUnitMovingDirection
   
  set UnitMovingDir  -1 ; set to an invalid value
 
- ;if (PreferedDirection = "Close to Player") [ set PreferedDirection "none"]
+ 
   
-  set DEBUG false
  while [UnitMovingDir < 0]
  [ 
   
    ask patches with [groupID = selectedUnit] ;assign a moovingDir value to each Brick 0-3
    [
      
-     if (PreferedDirection = "none") [ set movingDir one-of validMovesList]
-     if (PreferedDirection = "North")[ set DEBUG true ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 1 validMovesList)) [set movingDir 1] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "none")[ set movingDir one-of validMovesList]
+     if (PreferedDirection = "North")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 1 validMovesList)) [set movingDir 1] [set movingDir one-of validMovesList] ]
      if (PreferedDirection = "South")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 3 validMovesList)) [set movingDir 3] [set movingDir one-of validMovesList] ]
      if (PreferedDirection = "East") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 2 validMovesList)) [set movingDir 2] [set movingDir one-of validMovesList] ]
      if (PreferedDirection = "West") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 0 validMovesList)) [set movingDir 0] [set movingDir one-of validMovesList] ]
@@ -328,9 +327,8 @@ to decideUnitMovingDirection
      ifelse ((PreferedDirection = "North-East") and ((member? 1 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
      ifelse ((PreferedDirection = "North-West") and ((member? 1 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
      ifelse ((PreferedDirection = "South-East") and ((member? 3 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
-     ifelse ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
+     ifelse ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ][set movingDir one-of validMovesList]
     
-         
     ] 
 
 
@@ -567,10 +565,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-1360
-327
-1438
-360
+902
+19
+980
+52
 NIL
 firstRow
 T
@@ -584,10 +582,10 @@ NIL
 1
 
 BUTTON
-1363
-370
-1437
-403
+905
+62
+979
+95
 NIL
 secRow
 T
@@ -618,10 +616,10 @@ NIL
 1
 
 BUTTON
-1454
-417
-1551
-450
+996
+109
+1093
+142
 NIL
 pickOneUnit
 NIL
@@ -680,10 +678,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-1403
-496
-1513
-529
+945
+188
+1055
+221
 NIL
 canMove
 NIL
@@ -697,10 +695,10 @@ NIL
 1
 
 BUTTON
-1373
-459
-1550
-492
+915
+151
+1092
+184
 NIL
 decideUnitMovingDirection
 NIL
@@ -714,10 +712,10 @@ NIL
 1
 
 BUTTON
-1446
-556
-1521
-589
+988
+248
+1063
+281
 NIL
 doMove
 NIL
@@ -787,71 +785,30 @@ false
 PENS
 "default" 1.0 0 -16777216 true "" "plot ((UnitMoveCounter / (TurnCounter + 1)) * 100)"
 
+CHOOSER
+931
+352
+1078
+397
+PreferedDirection
+PreferedDirection
+"none" "Close to Player" "Away from Player" "North" "South" "West" "East" "North-East" "North-West" "South-East" "South-West"
+7
+
 SLIDER
-870
-76
-1081
-109
+920
+414
+1131
+447
 directionPreferenceIncluence
 directionPreferenceIncluence
 10
-100
+90
 90
 10
 1
 NIL
 HORIZONTAL
-
-SLIDER
-872
-159
-1044
-192
-PlayerX
-PlayerX
--16
-16
-0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-875
-215
-1047
-248
-PlayerY
-PlayerY
--16
-16
-0
-1
-1
-NIL
-HORIZONTAL
-
-CHOOSER
-872
-19
-1010
-64
-PreferedDirection
-PreferedDirection
-"fgh" "North"
-1
-
-SWITCH
-1139
-147
-1242
-180
-DEBUG
-DEBUG
-0
-1
--1000
 
 @#$#@#$#@
 ## WHAT IS IT?
