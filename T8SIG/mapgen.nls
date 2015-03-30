@@ -1,0 +1,409 @@
+; Author Calum Brown
+; Code for random maze generation
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Create variables
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+globals 
+[
+
+  preWallColor ;color of the "pre walls"
+  wallColor ;color of the walls
+  backColor ;color of the background
+  exitColor ;color of the exit patch
+  allPatches ;agentset of all patches
+  randInt ;variable used to hold a random integer
+  numPatches ;integer used to hold the number of patches... somewhere
+  blueNeighbors ;variable used to hold the number of "blue" (or sometimes green) patches
+  greenPatches ;variable used to hold all green patches (or pre walls)
+  curPatch ;variable used to hold the current patch
+  failedNeighbors ;integer variable used to hold the number of times a patch failed to find a suitable adjacent wall to form a shape
+  tempShapeAgentSet ;temporary agentset to hold patches that form a shape
+  shapeAgentSet ;agentset that holds the current shape
+  
+]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;main function
+;calls all map generation functions in sequence
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to genMap
+  setup
+  selectSourcePatches
+  generateWalls
+  fillInGaps
+  makeWalls
+  makeExit
+  finalize
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;This method sets up the variables needed
+;and sets all patches to be the background color
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to setup 
+  
+  init
+
+  ;setup world
+  set numPatches 50
+  set preWallColor green
+  set wallColor blue
+  set backColor black
+  set exitColor violet
+  ask patches [set pcolor backColor]
+end
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;This method randomly selects patches around the world to be source blocks
+;making sure no source blocks are touching eachother
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to selectSourcePatches
+  set randInt 0
+  ;while we still want walls
+  while [numPatches > 0]
+  [
+    ;for each patch
+    ask patches 
+    [
+      ;if color is blue
+      if pcolor = backColor
+      [
+        ;set number of blue neighbors to zero
+        set blueNeighbors 0
+        ;for each neighbor
+        ask neighbors
+        [  
+          ;if color of neighbor is not red
+          if pcolor != preWallColor
+          [
+            ;increment blueNeighbor
+            set blueNeighbors blueNeighbors + 1
+          ]
+        ]
+        ;if blueNeighbors == 8 (if all neighbours are blue)
+        if blueNeighbors = 8
+        [
+          ;generate random number between 0 and 10
+          set randInt random 10
+          ;if number greater than eight
+          if randInt > 8
+          [
+            ;set color of patch to red
+            set pcolor preWallColor
+            ;decrement number of patches
+            set numPatches numPatches - 1
+          ]
+        ]
+      ]
+    ]
+  ]
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;This method iterates on the source blocks to produce shapes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to generateWalls
+  ;list holding all of the patches in the current shape
+  let shapeList[]
+  ;create temporary agentset and set null
+  set tempShapeAgentSet n-of 0 patches
+  ;populate greenPatches will all patches
+  set greenPatches patches
+  ;for all patches
+  ask patches
+  [
+    ;if color is background
+    if pcolor = backColor
+    [
+      ;remove from greenPatches
+      set greenPatches greenPatches with [self != myself]
+    ]
+  ]
+   ;for each greenpatch
+   ask greenPatches
+   [
+     ;
+     ;Get patches forming shape involving the current patch
+     ;
+     ;clear agentset
+     set tempShapeAgentSet n-of 0 patches
+     ;set shapeAgentSet null
+     set shapeAgentSet n-of 0 patches
+     ;srt failedNeighbors null
+     set failedNeighbors 0
+     ;add current green patch to agentset
+     set tempShapeAgentSet (patch-set self tempShapeAgentSet) 
+     ;while the agentset has a patch in it
+     while [count tempShapeAgentSet > 0]
+     [
+       ;get green neighbors of current patch (other walls attatched to it)
+       ask neighbors4
+       [
+         ;set current patch to this patch
+         set curPatch self
+         ;if current patch color is pre wall
+         if pcolor = preWallColor
+         [
+            
+           ;for each patch in shape
+           ask tempShapeAgentSet
+           [
+             ;if current patch is not in shape
+             if curPatch != self
+             [
+               ;add current patch to shape
+               set tempShapeAgentSet (patch-set tempShapeAgentSet self)
+             ]
+             if curPatch = self
+             [
+               ;if current patch is in shape 
+               set tempShapeAgentSet tempShapeAgentSet with [curPatch != myself]
+             ]
+           ]
+         ]
+         ;if the patch is background
+         if pcolor = backColor
+         [
+           ;incremnet failed neighbors
+           set failedNeighbors failedNeighbors + 1 
+         ]
+         ;if all neighbors are failed
+         if failedNeighbors = 4
+         [
+           ;add current patch to shape agentset
+           set shapeAgentSet (patch-set tempShapeAgentSet self)
+           ;remove current patch from temp shape agentset
+           set tempShapeAgentSet tempShapeAgentSet with [curPatch != myself]
+         ]
+       ]
+     ]
+     
+     ;for each direct neighbor of currentpatch
+     ask neighbors4
+     [
+       ;set blueNeighbors to 0
+       set blueNeighbors 0
+       ;for each neighbor of "self"
+       ask neighbors
+       [
+          
+         ;if wall not pre wall color then it must be blue
+         if pcolor = backColor
+         [
+           ;increment blue wall
+           set blueNeighbors blueNeighbors + 1
+         ]
+         ;if pcolor = color of walls 
+         if pcolor = preWallColor
+         [
+           set curPatch self
+           ;check to see if it is the "parent" patch
+           ask shapeAgentSet
+           [
+             if self = curPatch
+             [
+               ;current neighbor is parent patch, increment blueNeighbors
+               set blueNeighbors blueNeighbors + 1
+             ]
+           ]
+         ]
+       ]
+       if blueNeighbors >= 8
+       [
+         ;make new wall
+         set pcolor preWallColor
+       ]
+       if blueNeighbors < 8
+       [
+         ;cant make new wall, remove from greenpatches agentset
+         set greenPatches greenPatches with [curPatch != myself]
+       ]
+     ]
+   ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;This method finds large holes in the map and attempts to fill them in
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to fillInGaps
+  ;for each patch
+  ask patches
+  [
+    ;set blueNeighbors int to zero
+    set blueNeighbors 0
+    ;if color of patch is the background color
+    if pcolor = backColor
+    [
+      ;ask each neighbor of the blue patch
+      ask neighbors 
+      [
+        ;if the color of the neighboring patch is the background color 
+        if pcolor = backcolor
+        [
+          ;increment the number of blue neighbors
+          set blueNeighbors blueNeighbors + 1
+        ]
+      ]
+      ;if the number of blueNeighbors is eight
+      ;(all of the patches surrounding the patch are background"
+      if blueNeighbors = 8
+      [
+        ;make the patch a wall since it is in open space
+        set pcolor preWallColor
+      ]
+    ]
+  ]
+end
+
+to makeWalls
+ ;West Wall
+ ask patch -10 10 [set pcolor 93]
+ ask patch -10 9 [set pcolor 93]
+ ask patch -10 8 [set pcolor 93]
+ ask patch -10 7 [set pcolor 93]
+ ask patch -10 6 [set pcolor 93]
+ ask patch -10 5 [set pcolor 93]
+ ask patch -10 4 [set pcolor 93]
+ ask patch -10 3 [set pcolor 93]
+ ask patch -10 2 [set pcolor 93]
+ ask patch -10 1 [set pcolor 93]
+ ask patch -10 0 [set pcolor 93]
+ ask patch -10 -1 [set pcolor 93]
+ ask patch -10 -2 [set pcolor 93]
+ ask patch -10 -3 [set pcolor 93]
+ ask patch -10 -4 [set pcolor 93]
+ ask patch -10 -5 [set pcolor 93]
+ ask patch -10 -6 [set pcolor 93]
+ ask patch -10 -7 [set pcolor 93]
+ ask patch -10 -8 [set pcolor 93]
+ ask patch -10 -9 [set pcolor 93]
+ ask patch -10 -10 [set pcolor 93]
+ ;North Wall
+ ask patch -10 10 [set pcolor 93]
+ ask patch -9 10 [set pcolor 93]
+ ask patch -8 10 [set pcolor 93]
+ ask patch -7 10 [set pcolor 93]
+ ask patch -6 10 [set pcolor 93]
+ ask patch -5 10 [set pcolor 93]
+ ask patch -4 10 [set pcolor 93]
+ ask patch -3 10 [set pcolor 93]
+ ask patch -2 10 [set pcolor 93]
+ ask patch -1 10 [set pcolor 93]
+ ask patch -0 10 [set pcolor 93]
+ ask patch 1 10 [set pcolor 93]
+ ask patch 2 10 [set pcolor 93]
+ ask patch 3 10 [set pcolor 93]
+ ask patch 4 10 [set pcolor 93]
+ ask patch 5 10 [set pcolor 93]
+ ask patch 6 10 [set pcolor 93]
+ ask patch 7 10 [set pcolor 93]
+ ask patch 8 10 [set pcolor 93]
+ ask patch 9 10 [set pcolor 93]
+ ask patch 10 10 [set pcolor 93]
+  ;East Wall
+ ask patch 10 10 [set pcolor 93]
+ ask patch 10 9 [set pcolor 93]
+ ask patch 10 8 [set pcolor 93]
+ ask patch 10 7 [set pcolor 93]
+ ask patch 10 6 [set pcolor 93]
+ ask patch 10 5 [set pcolor 93]
+ ask patch 10 4 [set pcolor 93]
+ ask patch 10 3 [set pcolor 93]
+ ask patch 10 2 [set pcolor 93]
+ ask patch 10 1 [set pcolor 93]
+ ask patch 10 0 [set pcolor 93]
+ ask patch 10 -1 [set pcolor 93]
+ ask patch 10 -2 [set pcolor 93]
+ ask patch 10 -3 [set pcolor 93]
+ ask patch 10 -4 [set pcolor 93]
+ ask patch 10 -5 [set pcolor 93]
+ ask patch 10 -6 [set pcolor 93]
+ ask patch 10 -7 [set pcolor 93]
+ ask patch 10 -8 [set pcolor 93]
+ ask patch 10 -9 [set pcolor 93]
+ ask patch 10 -10 [set pcolor 93]
+ ;South Wall
+ ask patch -10 -10 [set pcolor 93]
+ ask patch -9 -10 [set pcolor 93]
+ ask patch -8 -10 [set pcolor 93]
+ ask patch -7 -10 [set pcolor 93]
+ ask patch -6 -10 [set pcolor 93]
+ ask patch -5 -10 [set pcolor 93]
+ ask patch -4 -10 [set pcolor 93]
+ ask patch -3 -10 [set pcolor 93]
+ ask patch -2 -10 [set pcolor 93]
+ ask patch -1 -10 [set pcolor 93]
+ ask patch -0 -10 [set pcolor 93]
+ ask patch 1 -10 [set pcolor 93]
+ ask patch 2 -10 [set pcolor 93]
+ ask patch 3 -10 [set pcolor 93]
+ ask patch 4 -10 [set pcolor 93]
+ ask patch 5 -10 [set pcolor 93]
+ ask patch 6 -10 [set pcolor 93]
+ ask patch 7 -10 [set pcolor 93]
+ ask patch 8 -10 [set pcolor 93]
+ ask patch 9 -10 [set pcolor 93]
+ ask patch 10 -10 [set pcolor 93]
+
+end 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;This function sets the final colors of the map
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to finalize
+  ask patches
+    [
+      if pcolor = preWallColor
+      [
+        ;SET WALL COLOR HERE
+        set pcolor wallColor
+      ]
+      if pcolor = backColor
+      [
+        ;SET BACKGROUND COLOR HERE
+      ]
+    ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;this method attempts to make an exit block on the top right of the map
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+to makeExit
+  ;set number of exits to zero
+  let exits 0
+  ;ask patch at position 8 8 
+    ask patch 8 8 
+    [
+      ;if color = background color
+      if pcolor = backcolor
+      [
+        ;make color exit color 
+        set pcolor exitColor
+      ]
+      ;if patch is a wall
+      if pcolor = preWallColor
+      [
+        ;ask random neighbors
+        ask neighbors
+        [
+          ;if neighbor is blank patch
+          if pcolor = backColor
+          [
+            ;and if there is no exit already
+            if exits = 0          
+            [
+              ;set color of exit patch exit color
+              set pcolor exitColor
+              ;increment number of exits so we dont get more than one
+              set exits exits + 1
+            ]
+          ]   
+        ]
+      ]
+    ]
+end

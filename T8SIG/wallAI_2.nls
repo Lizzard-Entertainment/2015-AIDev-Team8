@@ -1,0 +1,603 @@
+; Author: Zoltan Tompa - 2015
+;
+;
+; notes: 
+;       by default, patches get a groupID variable with the initial value of 0 !!!
+;       word wrapping has to be disabled
+;       wall movement doesn't takes the player or enemy's into account, can just crushes them
+;
+;
+;; BUGs::
+
+;;TO-DOs
+
+;- try to implement "interface" that promisses input/outputs (if any) 
+
+;Ideas; 
+
+;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
+;- add pickup that would change the tiles want to prefer a direction (set, like up/down/etc, OR away/to the player's location)
+;- add functionality to Unit reFormation (Join/Split Units)
+;/ they can "prefer" to join smaller/bigger/no prefference Units
+;/ there will be a precentage for Join or not (one random no (on slider) for the whol Unit)
+;/ Bricks vote to separate themselfs form their Units (and may join aother one if it's 1 tile away) (value on slider)
+
+patches-own [
+             patchID    ; a simple counter for all patches to be numbered starts with 1
+             groupID    ; to group Units together
+             movingWill   ;how much the individual Bricks want to move (scale 0-10)
+             movingDir  ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
+             ]
+
+
+globals [
+  
+   ;X the precentige need to be met for a unit to decide to move
+   ;Y the precentige need to be met for a unit to decide on moving direction
+    
+  groupIdCounter         ;to keep track of the number of units
+  patchIDcounter         ;to number the patches
+  isfirtsredfound
+  
+  UnitIDList             ;list of existing UnitIDs
+  UnitMovingDir          ;agreed direction of Unit movement
+  validMovesList         ;list of valid moves
+  canUnitMove            ;is selected Unit free to move to the agreed movement?
+  UnitWantsMove          ;is selected Unit wants to move at all?
+  
+  UnitMoveCounter        ;how much move happened overall
+  TurnCounter            ;how much move could had happened (if 100% move)
+  
+  WorldRowCount
+  WorldColCount
+
+  curCol
+  curRow
+  
+  BrickColor
+  BGColor
+
+  outerWallColor
+   
+  
+
+  
+  
+  selectedUnit  ;the selected unit choosen to allow to move
+
+         ]
+
+
+
+
+;;;M1.2
+;;a method to initialise and set up the global variables
+;-----------------------------------------------------------------------------------------
+to init
+    clear-all
+    clear-patches
+    reset-ticks
+    set UnitMoveCounter 0
+    set TurnCounter 0
+    clear-all-plots 
+    clear-globals 
+
+    ;set up PUBLIC variables
+    set WorldRowCount 9 ;
+    set WorldColCount 9 ; the dimensions of the non-wrapping world
+    set BrickColor  blue
+    set BGColor  black
+
+    ;set up PRIVATE variables
+    set groupIdCounter 0 ;reset the groupcounter
+    set isfirtsredfound false;
+    set patchIDcounter 1;
+    set curRow WorldRowCount
+    
+    set UnitWantsMove false
+    set validMovesList []
+    
+    set outerWallColor 93
+    
+
+    initrow
+  
+end
+
+
+
+
+;;;M2
+;;method to find neighbouring bricks, and form Units with them
+;-----------------------------------------------------------------------------------------
+to formUnits
+  
+    
+  ;; form the first row (call method)
+  set curCol (- WorldColCount - 1)
+  let i  (- WorldColCount)
+  while [ i < (WorldColCount + 1)]
+  [
+
+    firstRow
+    set  i i + 1
+  ]
+   
+   
+   
+   
+  ;; form the other rows (call method)  
+  let j (- WorldColCount)
+
+  while [ j < (WorldColCount + 1)]  
+  [
+    
+  
+  set i (- WorldRowCount)
+  while [ i < (WorldRowCount + 1)]
+  [
+    secRow
+    set  i (i + 1)
+  ]
+  
+  
+  set  j (j + 1)
+  ]
+    
+;;call method to generate a valid groupIDlist  
+buildUnitIDList
+  
+  
+end
+
+;;;M2.1
+;;method to form units in the first row
+;-----------------------------------------------------------------------------------------
+to firstRow
+
+  
+  set curCol curCol + 1
+  
+  
+  
+      if curCol = (WorldColCount + 1) [ initrow set curRow curRow - 1 stop ]
+
+
+    ask patch curCol curRow 
+       [
+         ;number every patch for easier processing
+         set patchID patchIDcounter
+         set patchIDcounter patchIDcounter + 1
+         
+         ;check if patch is a Brick or not
+         ifelse pcolor = BrickColor [ 
+                               if isfirtsredfound = false [set groupID 1 set groupIdCounter groupIdCounter + 2 set isfirtsredfound true]
+                               
+                               if groupID = 0[ set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]
+                               
+                               if (showWallLabels ) [set plabel groupID]
+                               
+                               if curCol != (WorldColCount) [ask patch (curCol + 1) curRow [if pcolor = BrickColor [ set groupID [groupID] of patch curCol curRow  if (showWallLabels) [set plabel groupID]]]] ;ask ahead but not in the last Col
+                               ;ask patch curCol (curRow - 1) [if pcolor = BrickColor [ set groupID [groupID] of patch curCol curRow  set plabel groupID]] ;ask below
+                               
+                              ]
+         
+         
+         
+         [  ] ; is not a Brick    
+        ]
+  
+end
+
+;;;M2.2
+;;method to form Units in every additional row
+;-----------------------------------------------------------------------------------------
+to secRow
+  set curCol curCol + 1
+      if curCol = (WorldColCount + 1) [ initrow set curRow curRow - 1 stop ]
+  
+  let rowAboveBrick  false;
+
+    ask patch curCol curRow 
+       [
+         
+         ;number every patch for easier processing
+         set patchID patchIDcounter
+         set patchIDcounter patchIDcounter + 1
+         
+         ;check if patch is a Brick or not
+         ifelse pcolor = BrickColor [ 
+                               
+                               
+                               ifelse [groupID] of patch curCol (curRow + 1) != 0 [ set groupID [groupID] of patch curCol (curRow + 1)  set rowAboveBrick  true] ;ask above
+                               [if groupID = 0 [set groupID groupIdCounter set groupIdCounter groupIdCounter + 1]]
+                               if (showWallLabels) [set plabel groupID]
+                               
+                               
+                              if curCol != (- WorldColCount) [ask patch (curCol - 1) curRow [if (pcolor = BrickColor) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow if (showWallLabels) [set plabel groupID]  ]]] ;ask behind, except in the first col
+                              if curCol != (WorldColCount)  [ask patch (curCol + 1) curRow [if (pcolor = BrickColor) and ((groupID = 0) or (rowAboveBrick = true)) [ set groupID [groupID] of patch curCol curRow if (showWallLabels) [set plabel groupID]  ]]] ;ask ahead, except the last col
+                               
+                              ]
+         
+         
+         
+         [ ] ; is not a Brick    
+        ]
+    
+end
+
+
+;;;M2.1.1
+;;method to reset the col number in the end of every row
+;-----------------------------------------------------------------------------------------
+to initrow
+  
+      set curCol  (- WorldRowCount - 1)
+  
+end
+
+
+
+
+;;;M2.3
+;; a method to build a list of valid Unit IDs
+;-----------------------------------------------------------------------------------------
+to buildUnitIDList
+
+let i 1
+set UnitIDList []
+
+while [i <= patchIDcounter]
+
+[
+
+ask patches with [(patchID = i)] [ if (groupID) != 0 [ ifelse(member? groupID UnitIDList) [] [ set UnitIDList lput groupID UnitIDList ]  ] ]
+  
+set i i + 1  
+]
+
+if (DebugMSG) [show UnitIDList]
+
+end
+
+
+
+;;;M4.1
+;; method to pick a random unit
+;-----------------------------------------------------------------------------------------
+to pickOneUnit
+  
+;from the 2nd instance, set the previously picked unit back the the BGColor
+ifelse (selectedUnit = 0) [][ask patches with [groupID = selectedUnit] [set pcolor BrickColor]]
+
+  
+set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of groups
+if (DebugMSG) [print selectedUnit]
+ask patches with [groupID = selectedUnit] [set pcolor green]
+
+tick  
+  
+end
+
+;;;M4.2
+;;method to find out if Bricks wants to move more than X or not
+;-----------------------------------------------------------------------------------------
+to decideIfMoving
+  
+  let AVG  0
+  ask patches with [groupID = selectedUnit] [set movingWill random 11] ;assign a moovingwill value to each Brick 0-10
+  set AVG sum [movingWill] of patches with [groupID = selectedUnit]
+  set AVG AVG / count patches with [groupID = selectedUnit]
+
+  if (DebugMSG) [print AVG]
+  
+  ifelse (AVG >= X) [ if (DebugMSG) [print "to infinity, and beyound!!!"] set UnitWantsMove true] [ set UnitWantsMove false] ;check if more Bricks than X wants to move or not
+  
+end
+
+;;;M4.3
+;;method to find out which way Bricks wants to go   [0=left|1=up|2=right|3=down]
+;-----------------------------------------------------------------------------------------
+to decideUnitMovingDirection
+  
+ set UnitMovingDir  -1 ; set to an invalid value
+
+ 
+  
+ while [UnitMovingDir < 0]
+ [ 
+  
+    ask patches with [groupID = selectedUnit] ;assign a moovingDir value to each Brick 0-3
+   [
+     
+     if (PreferedDirection = "none")[ set movingDir one-of validMovesList]
+     if (PreferedDirection = "North")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 1 validMovesList)) [set movingDir 1] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "South")[ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 3 validMovesList)) [set movingDir 3] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "East") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 2 validMovesList)) [set movingDir 2] [set movingDir one-of validMovesList] ]
+     if (PreferedDirection = "West") [ ifelse ( (random 10 < (directionPreferenceIncluence / 10) ) and (member? 0 validMovesList)) [set movingDir 0] [set movingDir one-of validMovesList] ]
+
+
+     if ((PreferedDirection = "North-East") and ((member? 1 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 2]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "North-East") and ( not (member? 1 validMovesList) or  not (member? 2 validMovesList))) [set movingDir one-of validMovesList]
+
+     if ((PreferedDirection = "North-West") and ((member? 1 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "North-West") and ( not (member? 1 validMovesList) or not (member? 0 validMovesList))) [set movingDir one-of validMovesList]
+     
+     if ((PreferedDirection = "South-East") and ((member? 3 validMovesList) or (member? 2 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 3] [set movingDir 2]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "South-East") and ( not (member? 3 validMovesList) or  not (member? 2 validMovesList))) [set movingDir one-of validMovesList]
+     
+     if ((PreferedDirection = "South-West") and ((member? 3 validMovesList) or (member? 0 validMovesList))) [ ifelse (random 10 < (directionPreferenceIncluence / 10)) [ifelse ( random 2 = 0) [set movingDir 1] [set movingDir 0]] [set movingDir one-of validMovesList] ]
+     if ((PreferedDirection = "South-West") and ( not (member? 3 validMovesList) or  not (member? 0 validMovesList))) [set movingDir one-of validMovesList]
+    ]
+
+
+  let _left count patches with [(groupID = selectedUnit) and (movingDir = 0)]
+  let _up count patches with [(groupID = selectedUnit) and (movingDir = 1)]
+  let _right count patches with [(groupID = selectedUnit) and (movingDir = 2)]
+  let _down count patches with [(groupID = selectedUnit) and (movingDir = 3)]
+
+  let _leftPCT (_left / count patches with [groupID = selectedUnit]) * 100
+  let _upPCT (_up / count patches with [groupID = selectedUnit]) * 100
+  let _rightPCT (_right / count patches with [groupID = selectedUnit]) * 100
+  let _downPCT (_down / count patches with [groupID = selectedUnit]) * 100
+  
+  if (_leftPCT > Y) [set UnitMovingDir 0]
+  if (_upPCT > Y) [set UnitMovingDir 1]
+  if (_rightPCT > Y) [set UnitMovingDir 2]
+  if (_downPCT > Y) [set UnitMovingDir 3]  
+     
+ ]  
+
+if (DebugMSG) [print UnitMovingDir]
+ 
+end
+
+;;;M4.4
+;; a method to see if the selected Unit can move in the selected direction
+;; FOR A UNIT TO BE ABLE TO MOVE TO A DIRECTION, LOCATIONS TO ALL BRICKS CURRENT LOC. +1 IN THE MOVING DIRECTIONS HAS TO HAVE EITHER THE UNIT ID, OR 0 (EMPTY)
+;-----------------------------------------------------------------------------------------
+to canMove
+  
+  let i  0
+  let unitMemberList []
+  set canUnitMove true ;set to true
+  
+  let moveRowDiff  0
+  let moveColDiff  0
+  
+  ;interpret UnitMovingDir
+  if (UnitMovingDir = 0) [set moveColDiff -1]
+  if (UnitMovingDir = 1) [set moveRowDiff 1]
+  if (UnitMovingDir = 2) [set moveColDiff 1]
+  if (UnitMovingDir = 3) [set moveRowDiff -1]
+  
+  
+  ask patches with [groupID = selectedUnit] [set unitMemberList lput patchID unitMemberList] ;making a list of all the members in the actual Unit
+  
+
+  ; while: If reporter reports false, exit the loop. Otherwise run commands and repeat. 
+  while [(i < length unitMemberList)] ; loop ends if all members report true, or one member reports false
+  [
+    ;check for world boundaries
+    ;*ask patches with [patchID = item i unitMemberList] [ if ( ((pxcor + moveColDiff) < -16) or ((pxcor + moveColDiff) > 16) or ((pycor + moveRowDiff) < -16) or ((pycor + moveRowDiff) > 16)) [set canUnitMove false]]
+      ask patches with [patchID = item i unitMemberList] [ if ((((pxcor + moveColDiff) < (- WorldColCount)) or((pxcor + moveColDiff) > (WorldColCount))) or (((pycor + moveRowDiff) < (- WorldRowCount)) or((pycor + moveRowDiff) > (WorldRowCount)))) [set canUnitMove false]]
+
+    
+    
+    if (canUnitMove = true)
+    [
+    ;check for otherwise ok movement (other Units can be in the way)
+    ask patches with [patchID = item i unitMemberList] [ ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ ifelse((groupID = 0)or(groupID = selectedUnit)) [] [set canUnitMove false]  if (pcolor = exitColor) [set canUnitMove false]   ]]    
+    ]
+    
+    set i i + 1
+    
+
+  ]
+  
+  ;for DEBUGGING
+ if (DebugMSG) [ifelse (canUnitMove = false)[print "can't go =("][ print "off we goooo =D"]]
+  
+end
+
+
+;;;M4.5
+;; a method to physically move the selected unit, if the movement is AUTOHISED by "canMove" method
+;-----------------------------------------------------------------------------------------
+to doMove
+  
+  let i  0
+  let unitMemberList []
+
+  
+  let moveRowDiff  0
+  let moveColDiff  0
+  
+  ;interpret UnitMovingDir
+  if (UnitMovingDir = 0) [set moveColDiff -1]
+  if (UnitMovingDir = 1) [set moveRowDiff 1]
+  if (UnitMovingDir = 2) [set moveColDiff 1]
+  if (UnitMovingDir = 3) [set moveRowDiff -1]
+  
+  
+  
+  ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
+  
+  ask patches with [pcolor = pink] [ set pcolor BrickColor set groupID selectedUnit if (showWallLabels) [set plabel groupID]]
+  ask patches with [(groupID = 0) and (pcolor != orange) and (pcolor != outerWallColor) and (pcolor != exitColor)] [set pcolor BGColor set plabel ""]
+  
+  set  UnitMoveCounter UnitMoveCounter + 1
+  
+  tick
+  
+end
+
+
+
+;;;M4
+;; a method to tie together the 5 methods: pickOneUnit, decideIfMoving, decideUnitMovingDirection ,canMove ,doMove
+;-----------------------------------------------------------------------------------------
+
+to moveUnit
+  
+set TurnCounter TurnCounter + 1
+
+clearValidMovesList
+
+let exitloop false
+
+  ;pick a random unit
+  pickOneUnit
+   
+  tick
+   
+  ;see if they want to move
+  decideIfMoving
+  
+  if (UnitWantsMove = true)
+  [
+   
+    
+    while [exitloop = false]
+    [
+      
+      ;vote for a direction
+      decideUnitMovingDirection
+      
+      ;see if it's a valid move
+      canMove
+      
+      ifelse (canUnitMove = true) [set exitloop true] [ set validMovesList remove UnitMovingDir validMovesList ]  
+      if (length validMovesList = 0) [if (DebugMSG) [print "NO VALID MOVE !!!!!!"]  set exitloop true]
+      
+    ]
+    
+    if (length validMovesList != 0)
+    [
+      ;move there
+tick
+      doMove
+tick
+    ]
+    
+  ]
+  
+end
+
+
+
+;;;M4.6
+;; a method to reset the validMovesList
+;-----------------------------------------------------------------------------------------
+to clearValidMovesList
+  
+  ;clear validlist
+  while [(length validMovesList) > 0]
+  [
+    set validMovesList remove-item 0 validMovesList  
+  ]
+  
+  ;refill it
+  set validMovesList fput 0 validMovesList
+  set validMovesList lput 1 validMovesList
+  set validMovesList lput 2 validMovesList
+  set validMovesList lput 3 validMovesList
+
+  
+end
+
+
+
+
+;;; TEMP METHOD TO SHOW GAME OVER
+
+to gameover
+  
+init
+
+ 
+  
+let text matrix:from-row-list 
+[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 1 1 0 1 1 1 0 1 0 0 0 1 0 1 1 1 0 0]
+[1 0 0 0 0 1 0 1 0 1 1 0 1 1 0 1 0 0 0 0]
+[1 0 1 1 0 1 1 1 0 1 0 1 0 1 0 1 1 1 0 0]
+[1 0 0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 0 0 0]
+[0 1 1 1 0 1 0 1 0 1 0 0 0 1 0 1 1 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 1 1 0 1 0 0 0 1 0 1 1 1 0 1 1 1 0]
+[0 0 1 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1]
+[0 0 1 0 1 0 0 1 0 1 0 0 1 1 1 0 1 1 1 1]
+[0 0 1 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0]
+[0 0 1 1 1 0 0 0 1 0 0 0 1 1 1 0 1 0 0 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+ 
+ 
+let Tlabel matrix:from-row-list
+
+[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 1 1 0 2 2 2 0 3 0 0 0 3 0 4 4 4 0 0]
+[1 0 0 0 0 2 0 2 0 3 3 0 3 3 0 4 0 0 0 0]
+[1 0 1 1 0 2 2 2 0 3 0 3 0 3 0 4 4 4 0 0]
+[1 0 0 1 0 2 0 2 0 3 0 0 0 3 0 4 0 0 0 0]
+[0 1 1 1 0 2 0 2 0 3 0 0 0 3 0 4 4 4 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 5 5 5 0 6 0 0 0 6 0 7 7 7 0 8 8 8 0]
+[0 0 5 0 5 0 6 0 0 0 6 0 7 0 0 0 8 0 0 8]
+[0 0 5 0 5 0 0 6 0 6 0 0 7 7 7 0 8 8 8 8]
+[0 0 5 0 5 0 0 6 0 6 0 0 7 0 0 0 8 0 8 0]
+[0 0 5 5 5 0 0 0 6 0 0 0 7 7 7 0 8 0 0 8]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]] 
+ 
+  
+
+let j 10
+let i -10
+let k 0
+let l 0
+
+set BGColor black
+
+while [j > -10]
+
+[
+
+set i -10
+set l 0
+while [i < 10]
+[
+  ;print i 
+  print j
+  ;;print matrix:get text 1 i
+   ask patch i j [ if( (matrix:get text (k) (l)) = 1) [ set pcolor red set plabel matrix:get Tlabel (k) (l) set groupID matrix:get Tlabel (k) (l)] ] 
+   set i i + 1 
+   set l l + 1
+]  
+ 
+ set j j - 1 
+ set k k + 1
+]
+
+set UnitIDList [1 2 3 4 5 6 7 8]
+
+
+
+  
+end
+
+
+

@@ -1,0 +1,196 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY STATE CONTROL METHOD
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to updateEnemyState
+  
+  ;;See if enemies can do anything interesting.
+  ask enemies
+  [
+    ;;We need to check if we can act.
+    ;;If not, then it will need to rest.
+    ifelse canAct
+    [     
+      ;;If we can act, the enemy does not need to rest.  Therefore, we set the flag appropritely here.
+      set isResting false
+      
+      ifelse canSeek
+      [
+        ;;Switch to Seek state when we can act and canseek.
+        SeekState
+        
+        if canCatch
+        [
+          ;;Switch to Catch state when we can act and can catch
+          CatchState
+        ]        
+      ]
+      [
+        ;;Switch to Wander state when we have more than 25 energy and cannot seek.
+        WanderState
+      ]      
+    ]
+    [
+      ;;Switch to Rest state when we can't act.
+      RestState
+    ]    
+  ]  
+  
+  ;;;;If length of current path is greater than 0, move to next patch and tick.
+  ;;if PathLength > 0
+  ;;[ 
+  ;;  ask enemy 2
+  ;;  [
+  ;;    face item 1 current-path 
+  ;;    move-to item 1 current-path   
+  ;;  ]
+  ;;]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY STATE METHODS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to WanderState
+    
+  ;;Update State
+  set state "WANDER STATE"
+  
+  ;;Move forward if it has energy
+  forward 1
+       
+  ;;Regenerate energy quickly
+  if energy < 100 [set energy energy + 2]
+  
+  ;;If we regenerate too much energy, set energy to 100
+  if energy > 100 [ set energy 100 ]
+  
+  ;;Declare list.
+  let directions[]
+  
+  ;;Turn around if local walls are blue
+  ifelse [pcolor] of patch-ahead 1 != black and [pcolor] of patch-right-and-ahead 90 1 != black and [pcolor] of patch-left-and-ahead 90 1 != black
+  [
+    set directions lput 180 directions
+  ]
+  
+  ;Otherwise do the pathing stuff.
+  [   
+    ;;Check infront
+    if [pcolor] of patch-ahead 1 = black
+    [
+      ;Add a heavy weighting to the forward direction.
+      repeat 1 [ set directions lput 0 directions ]
+    ]
+    
+    ;;Check to the right
+    if [pcolor] of patch-right-and-ahead 90 1 = black
+    [
+      ;Add a light weighting to the right direction.
+      repeat 1 [ set directions lput 90 directions ]
+      
+    ]
+    
+    ;;Check to the left
+    if [pcolor] of patch-left-and-ahead 90 1 = black
+    [
+      ;Add a light weighting to the left direction.
+      repeat 1 [ set directions lput -90 directions ]
+    ]    
+  ]
+  
+  ;;Returns a random number between 0 and the list max minus 1. 
+  ;;For example, if only forward and right were options, the list would contain 2 elements.  0, and 1.
+  ;;Randomly return an index of this list to return a value, either right or forward.
+  let value random (length directions)
+  
+  ;;Change direction
+  set heading heading + item value directions 
+  
+end
+
+to SeekState
+  
+  ;;Update State
+  set state "SEEK STATE" 
+  
+  ;;Find a path!
+  find-shortest-path-to-destination
+  
+  ;;If the enemy has energy, decrement it.
+  set energy energy - 1
+  
+end
+
+to CatchState
+  
+  ;;Update State
+  set state "CATCH STATE"
+  
+  ;;Stop the game.
+  set GameStarted false
+  
+end
+
+to RestState
+  
+  ;;Update State
+  set state "REST STATE"
+  
+  ;;zero energy if not already resting            
+  ifelse isResting = false
+  [ 
+    ;;Zero energy and take a nap.
+    set energy 0 
+    
+    ;;Set resting flag
+    set isResting true
+  ]
+  [
+    ;;Regenerate energy
+    set energy energy + 1  
+  ]
+  
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ENEMY CHECK METHODS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to-report canSeek
+  
+  ;;Check for a player on the patches in a cone of length and radius 
+  ifelse any? players-on patches in-cone 5 360
+  [
+    report true
+  ]
+  [  
+    report false
+  ]
+  
+end
+
+to-report canCatch
+  
+  ;;If the player is on the same patch as the enemy, catch them like a fish.
+  ifelse any? players-on patch-here
+  [
+    report true
+  ]
+  [
+    report false
+  ]
+    
+end
+
+to-report canAct
+  
+  ;;If the enemy has less than 25 energy, it can't do anything and must rest.
+  ifelse energy > 25 
+  [
+   report true 
+  ]
+  [
+    report false
+  ]
+end
