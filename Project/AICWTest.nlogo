@@ -15,7 +15,7 @@ globals [
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  ALL THESE ABOVE GLOBALS CAN GO.  THEY'RE ONLY HERE BECAUSE THE PACMAN LEVEL EDITOR DEMANDS THEM.
 
-  GameStarted          ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
+  GameStarted               ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
 ]
 
 
@@ -216,19 +216,23 @@ to WanderState
     ;;Check infront
     if [pcolor] of patch-ahead 1 = black
     [
-      set directions lput 0 directions
+      ;Add a heavy weighting to the forward direction.
+      repeat EnemyForwardWeighting [ set directions lput 0 directions ]
     ]
     
     ;;Check to the right
     if [pcolor] of patch-right-and-ahead 90 1 = black
     [
-      set directions lput 90 directions
+      ;Add a light weighting to the right direction.
+      repeat EnemyRightWeighting [ set directions lput 90 directions ]
+      
     ]
     
     ;;Check to the left
     if [pcolor] of patch-left-and-ahead 90 1 = black
     [
-      set directions lput -90 directions
+      ;Add a light weighting to the left direction.
+      repeat EnemyLeftWeighting [ set directions lput -90 directions ]
     ]    
   ]
   
@@ -491,6 +495,51 @@ Enemy Energy
 1
 11
 
+SLIDER
+11
+348
+167
+381
+EnemyForwardWeighting
+EnemyForwardWeighting
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+11
+383
+167
+416
+EnemyLeftWeighting
+EnemyLeftWeighting
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+418
+166
+451
+EnemyRightWeighting
+EnemyRightWeighting
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -541,6 +590,9 @@ Clicking the buttons on the right of the display window will move the player acc
 #### Controlling The Player (Recommended)
 Use WASD to control the player.
 
+#### Influencing The Enemy
+Using the weighting sliders will influence the direction the enemy takes at a turning point.
+
 ## THINGS TO NOTICE
 
 ### Insight
@@ -553,6 +605,9 @@ What happens when the player touches the enemy when it is resting?
 
 ### Out For The Count
 Try to determine the energy threshold where the enemy is considered _exhausted_.
+
+### In Control
+Adjust the sliders to see how the enemy navigates the maze with particular influence.
 
 ## EXTENDING THE MODEL
 
