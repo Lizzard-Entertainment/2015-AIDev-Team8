@@ -1,0 +1,101 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PLAYER
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to PlayerUp  
+  
+  ;look forward. 
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 0 
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        reset-destination
+        forward 1
+        set-destination
+      ]  
+    ]
+  ]
+end
+
+to reset-destination
+   if patch-here != one-of patches with [innerLabel = "source"]
+  [
+    ask patches with [innerLabel = "destination"]
+    [
+      set innerLabel ""
+    ]
+  ]
+end
+
+to set-destination       
+    ask patch-here 
+    [ 
+      set innerLabel "destination" 
+    ] 
+end
+
+to PlayerRight
+  
+  ;Turn right
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 90
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        reset-destination
+        forward 1
+        set-destination
+      ] 
+    ]
+  ]
+end
+
+to PlayerDown
+  
+  ;Look backwards
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 180 
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        reset-destination
+        forward 1
+        set-destination
+      ] 
+    ]
+  ]
+end
+
+to PlayerLeft
+  
+  ;look left
+  if GameStarted
+  [
+    ask players 
+    [ 
+      set heading 270
+      
+      ;If that patch is black, then move onto it.
+      if [pcolor] of patch-ahead 1 = black
+      [
+        reset-destination
+        forward 1
+        set-destination
+      ] 
+    ]
+  ]
+  
+end
