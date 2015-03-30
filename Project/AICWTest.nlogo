@@ -15,7 +15,7 @@ globals [
   
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  ALL THESE ABOVE GLOBALS CAN GO.  THEY'RE ONLY HERE BECAUSE THE PACMAN LEVEL EDITOR DEMANDS THEM.
 
-  GameStarted               ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
+  GameStarted  ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
 ]
 
 
@@ -156,16 +156,14 @@ to updateEnemyState
     ;;If not, then it will need to rest.
     ifelse canAct
     [     
-      ;;If we can act, the enemy does not need to rest.  Therefore, we set the flat appropritely here.
+      ;;If we can act, the enemy does not need to rest.  Therefore, we set the flag appropritely here.
       set isResting false
       
-      ;;In the wander state, we can seek if we can act and can seek.
       ifelse canSeek
       [
         ;;Switch to Seek state when we can act and canseek.
         SeekState
         
-        ;;In the seek state, we can catch if we can act and can catch
         if canCatch
         [
           ;;Switch to Catch state when we can act and can catch
