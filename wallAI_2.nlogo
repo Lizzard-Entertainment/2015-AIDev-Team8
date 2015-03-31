@@ -48,14 +48,14 @@ globals [
   UnitMoveCounter        ;how much move happened overall
   TurnCounter            ;how much move could had happened (if 100% move)
   
-  WorldRowCount
-  WorldColCount
+  WorldRowCount          ;how many rows does the world exist of (on one side)
+  WorldColCount          ;how many colums does the world exist of (on one side)
 
   curCol
   curRow
   
-  BrickColor
-  BGColor
+  BrickColor             ;the color of the wall
+  BGColor                ;the color of the background
 
   
   
@@ -67,6 +67,7 @@ globals [
 ;-----------------------------------------------------------------------------------------
 to init
     ;clear the world
+    clear-all
     clear-patches 
     reset-ticks
     set UnitMoveCounter 0
@@ -127,18 +128,13 @@ to formUnits
     set  i i + 1
   ]
    
-   
-   
-   
+     
   ;; form the other rows (call method)  
   let j (- WorldColCount)
-
   while [ j < (WorldColCount + 1)]  
   [
-    
-  
-  set i (- WorldRowCount)
-  while [ i < (WorldRowCount + 1)]
+    set i (- WorldRowCount)
+    while [ i < (WorldRowCount + 1)]
   [
     secRow
     set  i (i + 1)
@@ -428,7 +424,7 @@ to doMove
   ask patches with [groupID = selectedUnit] [set groupID 0 ask patch (pxcor + moveColDiff) (pycor + moveRowDiff) [ set pcolor pink]]
   
   ask patches with [pcolor = pink] [ set pcolor BrickColor set groupID selectedUnit set plabel groupID]
-  ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor blue set plabel ""]
+  ask patches with [(groupID = 0) and (pcolor != orange)] [set pcolor BGColor set plabel ""]
   
   set  UnitMoveCounter UnitMoveCounter + 1
   
@@ -561,7 +557,7 @@ filling_level
 filling_level
 0
 500
-96
+213
 1
 1
 NIL
@@ -644,7 +640,7 @@ X
 X
 0
 10
-0
+5
 1
 1
 NIL
@@ -837,15 +833,14 @@ DEBUG SELECTION
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
 This Model emulates a basic artificial life environment, where a random map is generated and thereafter Units are formed. Then the Units try to move around the world restrained by rules.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
 After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and tries to form Units with them.
 Units stay together for the rest of the game.
-After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement. Finally the Unit moves (if the movement is possible) and another Unit is selected...
+After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement.
+This can be influenced. Finally the Unit moves (if the movement is possible) and another Unit is selected...
 
 
 ## HOW TO USE IT
@@ -858,37 +853,33 @@ Press moveUnits.
 
 Control the moving willingness with the X slider.
 Control the required direction agreement precentige with the Y slider.
-Control the extra vote Bricks get that wanted to move in the first place.
+Control the extra vote Bricks get that wanted to move in the first place. (not implemented)
+Select the prefered moving direction from the drop-down list
+Control the prefrecence influence with the slider below the list.
+
 
 'Generated Units' meter shows the number of individual Units currently on the map.
 'Total Unit Moves' shown the number of actual movements Units made so far
 'Moving precentige' shows the ratio between the total possible movements and actual movements Units made
 
 
-
 ## THINGS TO NOTICE
+
+Wall units stay together during the run.
+Wall shapes never crash into each other or push each other.
+If the Y slider is really high, Units take way longer to agree on a direction.
+Walls never vote to move to the same direction if they already found out it's invalid in the current iteration.
 
 (suggested things for the user to notice while running the model)
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+Change the moving direction / influence to see how the Bricks react to the change.
 
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+Developed by Zoltan Tompa - 2015, for the Team8 shared AI project.
 @#$#@#$#@
 default
 true
@@ -1196,7 +1187,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC2
+NetLogo 5.2-RC3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
