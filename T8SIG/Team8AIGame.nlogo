@@ -512,7 +512,13 @@ This project is a collaberative effort to make a game involving AI consisting of
 
 ### Map Generation
 
+
 ### Changing The Maze
+After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and try to form Units with them. 
+Units stay together for the rest of the game. 
+After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement.
+This can be influenced. 
+Finally the Unit moves (if the movement is possible) and another Unit is selected…
 
 ### Enemy FSM
 The enemy has 4 underlying states: **Wander**, **Seek**, **Catch**, and **Rest**.  These states are entered and exited under certain conditions in the simulation, and the enemy's own energy value.
