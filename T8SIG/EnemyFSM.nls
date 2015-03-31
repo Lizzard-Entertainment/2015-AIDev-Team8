@@ -162,10 +162,12 @@ to-report canSeek
   ;;Check for a player on the patches in a cone of length and radius 
   ifelse any? players-on patches in-cone 5 360
   [
-    report true
+    set color red
+    report true    
   ]
   [  
-    report false
+    set color yellow
+    report false    
   ]
   
 end
@@ -174,7 +176,7 @@ to-report canCatch
   
   ;;If the player is on the same patch as the enemy, catch them like a fish.
   ifelse any? players-on patch-here
-  [
+  [    
     report true
   ]
   [
@@ -188,9 +190,11 @@ to-report canAct
   ;;If the enemy has less than 25 energy, it can't do anything and must rest.
   ifelse energy > 25 
   [
+   ;Color will be set by higher level state.
    report true 
   ]
   [
+    set color blue
     report false
   ]
 end

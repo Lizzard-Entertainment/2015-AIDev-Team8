@@ -17,7 +17,7 @@ ifelse GameStarted = true
   updateEnemyState
 ]
 [
-  ifelse Victory
+  ifelse Victory = true
   [
     ;;If the player has won, display the victory screen
     playerwins
@@ -28,7 +28,6 @@ ifelse GameStarted = true
     gameOver
     moveUnit
   ]
-
 ]
 
 
@@ -92,14 +91,13 @@ to baseSetup
     [
       set shape "circle"
       set heading 0
+      set color yellow
       set energy 100
       set isResting false
       set state ""
       set current-path ""
     ]
-  ] 
-  
-  
+  ]  
   
   ;;Set Game Start
   set GameStarted true
