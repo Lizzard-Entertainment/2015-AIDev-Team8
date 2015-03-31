@@ -835,7 +835,7 @@ This Model emulates a basic artificial life environment, where a random map is g
 
 ## HOW IT WORKS
 
-After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and tries to form Units with them.
+After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and try to form Units with them.
 Units stay together for the rest of the game.
 After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement.
 This can be influenced. Finally the Unit moves (if the movement is possible) and another Unit is selected...
@@ -843,7 +843,6 @@ This can be influenced. Finally the Unit moves (if the movement is possible) and
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
 First set the Filling level with the slider.
 Then generate a map.
 Form initial Units.
