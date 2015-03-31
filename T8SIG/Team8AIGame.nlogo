@@ -535,6 +535,18 @@ The enemy requires energy for its actions.  Energy is gained in the **Wander** a
 
 ### A*
 
+This algorithm uses an exact heuristic function to approximate the optimal path from the enemy to the player location. It uses the concept of 'open' and 'closed' lists - the open list contains patches that have not yet been explored, and the closed list contains patches that have already been visited and will never be re-visited.
+
+Each time the pahtfinding procedure is called the open list is sorted in increasing order of each item's f() cost. The first patch to be explored will always be the first item in the open list, as it will always hold the lowest approximated cost from the enemy to the player location.  
+
+This exploration of patches loops until the destination has been reached or the open list has been exhausted - indicating there is no possible patch from the enemy to the player.
+
+The path is then stored in a variable, and the enemy is moved one along this path.
+
+Then the source position is updated to match the new enemy position, as the source position will need to be passed into the pathfinding procedure the next time it is called to calculate the path. 
+
+Finally, this whole procedure is repeated until the enemy has reached the destination patch.
+
 ## HOW TO USE IT
 
 ### Setup
@@ -553,15 +565,18 @@ Use the WASD or the on-screen keys to move the character. Try to get to the exit
 -The enemy states in the monitor.
 -The enemy energy value in the monitor.
 -The player can't move through the walls.
+-The pathfinding procedure is called every time the player and enemy move.
+-No matter what the maze is the A* algorithm finds the target quickly due to sorting of   the open list.
 
 ## THINGS TO TRY
 
 You can change : TODO things to change
 - Try to turn on the "showWallLabels", this way you can see which wall sections belong together.
-- Moving the X slider, the bigger the number it is, the more precentige the actual units need to vote yes to move the selection.
+- Moving the X slider, the bigger the number it is, the more percentage the actual units need to vote yes to move the selection.
 - Try to select an option from the PreferedDirection to make the wall prefer to move to a certain direction.
 - Set the directionPreferenceIncluence which is a precentige how likely they will take your selected direction 
 - Adjust the weighting sliders, and see what effect they have on the enemy's movement.
+- Replace A* with a different algorithm. 
 
 ## NETLOGO FEATURES
 
@@ -569,6 +584,8 @@ You can change : TODO things to change
 - agentsets 
 - includes
 - lists
+- neighbours4
+- sort-by
 
 ## We can make these
 
@@ -886,7 +903,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC2
+NetLogo 5.2-RC3
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
