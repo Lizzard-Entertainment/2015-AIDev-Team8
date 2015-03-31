@@ -23,10 +23,10 @@
 ;/ Bricks vote to separate themselfs form their Units (and may join aother one if it's 1 tile away) (value on slider)
 
 patches-own [
-             patchID    ; a simple counter for all patches to be numbered starts with 1
-             groupID    ; to group Units together
-             movingWill   ;how much the individual Bricks want to move (scale 0-10)
-             movingDir  ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
+             patchID     ; a simple counter for all patches to be numbered starts with 1
+             groupID     ; to group Units together
+             movingWill  ;how much the individual Bricks want to move (scale 0-10)
+             movingDir   ; in which of the 4 directions the unit wants to move (-1 +1 | col row)
              ]
 
 
@@ -48,21 +48,17 @@ globals [
   UnitMoveCounter        ;how much move happened overall
   TurnCounter            ;how much move could had happened (if 100% move)
   
-  WorldRowCount
-  WorldColCount
+  WorldRowCount          ;how many rows does the world exist of (on one side)
+  WorldColCount          ;how many colums does the world exist of (on one side)
 
   curCol
   curRow
   
-  BrickColor
-  BGColor
+  BrickColor             ;the color of the wall
+  BGColor                ;the color of the background
 
-  outerWallColor
-   
-  
-
-  
-  
+  outerWallColor         ;the color of the outer wall
+ 
   selectedUnit  ;the selected unit choosen to allow to move
 
          ]
@@ -122,19 +118,14 @@ to formUnits
     firstRow
     set  i i + 1
   ]
-   
-   
-   
+
    
   ;; form the other rows (call method)  
   let j (- WorldColCount)
-
   while [ j < (WorldColCount + 1)]  
   [
-    
-  
-  set i (- WorldRowCount)
-  while [ i < (WorldRowCount + 1)]
+    set i (- WorldRowCount)
+    while [ i < (WorldRowCount + 1)]
   [
     secRow
     set  i (i + 1)
@@ -508,14 +499,12 @@ end
 
 
 
-
-;;; TEMP METHOD TO SHOW GAME OVER
-
+;;;M5
+;;; Method to show the GameOver screen
+;-----------------------------------------------------------------------------------------
 to gameover
   
 init
-
- 
   
 let text matrix:from-row-list 
 [[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]

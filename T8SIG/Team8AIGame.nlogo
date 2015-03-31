@@ -149,10 +149,10 @@ NIL
 1
 
 SWITCH
-1733
-595
-1849
-628
+38
+580
+154
+613
 DebugMSG
 DebugMSG
 1
@@ -160,10 +160,10 @@ DebugMSG
 -1000
 
 SLIDER
-928
-114
-1100
-147
+929
+141
+1101
+174
 X
 X
 1
@@ -175,20 +175,20 @@ NIL
 HORIZONTAL
 
 CHOOSER
-1136
-74
-1274
-119
+1135
+85
+1273
+130
 PreferedDirection
 PreferedDirection
 "none" "North" "South" "East" "West" "North-East" "North-West" "South-East" "South-West"
 0
 
 SLIDER
-1108
-172
-1319
-205
+1125
+142
+1283
+175
 directionPreferenceIncluence
 directionPreferenceIncluence
 10
@@ -200,10 +200,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-927
-74
-1099
-107
+928
+95
+1100
+128
 Y
 Y
 51
@@ -249,10 +249,10 @@ NIL
 1
 
 SWITCH
-1131
-26
-1273
-59
+1130
+37
+1272
+70
 showWallLabels
 showWallLabels
 1
@@ -277,10 +277,10 @@ NIL
 0
 
 SLIDER
-925
-24
-1097
-57
+927
+52
+1099
+85
 wallSpeed
 wallSpeed
 1
@@ -309,10 +309,10 @@ NIL
 1
 
 BUTTON
-1601
-349
-1686
-382
+1016
+496
+1101
+529
 Player Up
 PlayerUp
 NIL
@@ -326,10 +326,10 @@ NIL
 1
 
 BUTTON
-1687
-386
-1785
-419
+1102
+533
+1200
+566
 Player Right
 PlayerRight
 NIL
@@ -343,10 +343,10 @@ NIL
 1
 
 BUTTON
-1604
-428
-1705
-461
+1019
+575
+1120
+608
 Player Down
 PlayerDown
 NIL
@@ -360,10 +360,10 @@ NIL
 1
 
 BUTTON
-1514
-392
-1606
-425
+929
+539
+1021
+572
 Player Left
 PlayerLeft
 NIL
@@ -377,10 +377,10 @@ NIL
 1
 
 MONITOR
-1500
-63
-1624
-108
+912
+298
+1036
+343
 Enemy State
 [ state ] of enemy 1
 17
@@ -388,10 +388,10 @@ Enemy State
 11
 
 MONITOR
-1497
-122
-1624
-167
+909
+357
+1036
+402
 Enemy Energy
 [energy] of enemy 1
 17
@@ -399,10 +399,10 @@ Enemy Energy
 11
 
 SLIDER
-1628
-63
-1800
-96
+1040
+298
+1212
+331
 EnemyForwardWeight
 EnemyForwardWeight
 1
@@ -414,10 +414,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1628
-100
-1800
-133
+1040
+335
+1212
+368
 EnemyLeftWeight
 EnemyLeftWeight
 1
@@ -429,10 +429,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-1628
-135
-1800
-168
+1040
+370
+1212
+403
 EnemyRightWeight
 EnemyRightWeight
 1
@@ -444,30 +444,30 @@ NIL
 HORIZONTAL
 
 TEXTBOX
-1546
-44
-1767
-74
+958
+279
+1179
+309
 ENEMY CONTROLS AND DISPLAYS
 12
 0.0
 1
 
 TEXTBOX
-1552
-319
-1750
-349
+967
+466
+1165
+496
 PLAYER MOVEMENT CONTROLS
 12
 0.0
 1
 
 TEXTBOX
-916
-178
-1066
-196
+968
+23
+1073
+41
 WALL CONTROLS
 12
 0.0
@@ -494,10 +494,10 @@ PLAY GAME
 1
 
 TEXTBOX
-1761
-567
-1911
-585
+66
+552
+122
+570
 DEBUG
 12
 0.0
@@ -880,7 +880,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.1.0
+NetLogo 5.2-RC2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
