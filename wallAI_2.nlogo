@@ -11,8 +11,6 @@
 
 ;;TO-DOs
 
-;- try to implement "interface" that promisses input/outputs (if any) 
-
 ;Ideas; 
 
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
@@ -564,10 +562,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-1397
-126
-1475
-159
+988
+367
+1066
+400
 NIL
 firstRow
 T
@@ -581,10 +579,10 @@ NIL
 1
 
 BUTTON
-1400
-169
-1474
-202
+991
+410
+1065
+443
 NIL
 secRow
 T
@@ -615,10 +613,10 @@ NIL
 1
 
 BUTTON
-1378
-210
-1475
-243
+969
+451
+1066
+484
 NIL
 pickOneUnit
 NIL
@@ -677,10 +675,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-1364
-292
-1474
-325
+955
+533
+1065
+566
 NIL
 canMove
 NIL
@@ -694,10 +692,10 @@ NIL
 1
 
 BUTTON
-1297
-252
-1474
-285
+888
+493
+1065
+526
 NIL
 decideUnitMovingDirection
 NIL
@@ -711,10 +709,10 @@ NIL
 1
 
 BUTTON
-1399
-335
-1474
-368
+990
+576
+1065
+609
 NIL
 doMove
 NIL
@@ -810,10 +808,10 @@ PreferedDirection
 2
 
 SWITCH
-1358
-81
-1474
-114
+949
+322
+1065
+355
 DebugMSG
 DebugMSG
 1
@@ -821,10 +819,10 @@ DebugMSG
 -1000
 
 TEXTBOX
-1356
-54
-1506
-73
+947
+295
+1097
+314
 DEBUG SELECTION
 15
 0.0
@@ -1187,7 +1185,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC3
+NetLogo 5.2-RC2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
