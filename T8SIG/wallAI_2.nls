@@ -599,5 +599,14 @@ set UnitIDList [1 2 3 4 5 6 7 8]
   
 end
 
+to playerwins
+  
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;CODE FOR THE PLAYER VICTORY GOES IN HERE
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  user-message "You win!"
+  
+end
+
 
 

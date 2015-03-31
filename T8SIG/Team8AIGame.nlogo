@@ -1,8 +1,10 @@
+;;Includes for each of the seperate code files written by all members.
 __includes["mapgen.nls" "wallAI_2.nls" "EnemyFSM.nls" "Pathfinding.nls" "PlayerControl.nls"]
 
+;;This allows matrices to be used.
 extensions [matrix]
 
-to temp
+to baseUpdate
   
 ifelse GameStarted = true
 [
@@ -15,12 +17,23 @@ ifelse GameStarted = true
   updateEnemyState
 ]
 [
-  gameOver
-  moveUnit
+  ifelse Victory
+  [
+    ;;If the player has won, display the victory screen
+    playerwins
+    moveunit
+  ]
+  [
+    ;;Otherwise, the game over screen
+    gameOver
+    moveUnit
+  ]
+
 ]
 
 
 tick
+wait 0.1
 
 end
 
@@ -33,6 +46,7 @@ end
 globals 
 [
   GameStarted    ;;Boolean indicator for the game's playing state.  When this is true, the player can move and the enemy will move.
+  Victory        ;;Boolean indicator for whether the player has won or not.
 ]
 
 patches-own
@@ -57,7 +71,8 @@ to baseSetup
   
   ;;Initialise variables
   set GameStarted false
-
+  set Victory false
+  
   ;;Create players
   ask one-of patches with [pcolor = black]
   [
@@ -90,15 +105,6 @@ to baseSetup
   set GameStarted true
 
 end
-
-to baseUpdate
-  
-  
-
-  tick
-  wait 0.1
-  
-end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -128,10 +134,10 @@ ticks
 30.0
 
 BUTTON
-27
-18
-143
-51
+29
+35
+145
+68
 Gen Map
 init\ngenMap\nformUnits\n
 NIL
@@ -228,10 +234,10 @@ NIL
 0
 
 BUTTON
-983
-308
-1070
-341
+1754
+697
+1841
+730
 NIL
 gameover
 NIL
@@ -261,7 +267,7 @@ BUTTON
 173
 194
 Play
-temp
+baseUpdate
 T
 1
 T
@@ -288,10 +294,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-27
-59
-144
-92
+29
+76
+146
+109
 Call Base Setup
 baseSetup
 NIL
@@ -305,10 +311,10 @@ NIL
 1
 
 BUTTON
-1266
-336
-1351
-369
+1601
+349
+1686
+382
 Player Up
 PlayerUp
 NIL
@@ -322,10 +328,10 @@ NIL
 1
 
 BUTTON
-1352
-373
-1450
-406
+1687
+386
+1785
+419
 Player Right
 PlayerRight
 NIL
@@ -339,10 +345,10 @@ NIL
 1
 
 BUTTON
-1269
-415
-1370
-448
+1604
+428
+1705
+461
 Player Down
 PlayerDown
 NIL
@@ -356,10 +362,10 @@ NIL
 1
 
 BUTTON
-1179
-379
-1271
-412
+1514
+392
+1606
+425
 Player Left
 PlayerLeft
 NIL
@@ -373,10 +379,10 @@ NIL
 1
 
 MONITOR
-1513
-35
-1637
-80
+1500
+63
+1624
+108
 Enemy State
 [ state ] of enemy 1
 17
@@ -384,43 +390,174 @@ Enemy State
 11
 
 MONITOR
-1512
-88
-1639
-133
+1497
+122
+1624
+167
 Enemy Energy
 [energy] of enemy 1
 17
 1
 11
 
+SLIDER
+1628
+63
+1800
+96
+EnemyForwardWeight
+EnemyForwardWeight
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1628
+100
+1800
+133
+EnemyLeftWeight
+EnemyLeftWeight
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+1628
+135
+1800
+168
+EnemyRightWeight
+EnemyRightWeight
+1
+10
+1
+1
+1
+NIL
+HORIZONTAL
+
+TEXTBOX
+1546
+44
+1767
+74
+ENEMY CONTROLS AND DISPLAYS
+12
+0.0
+1
+
+TEXTBOX
+1552
+319
+1750
+349
+PLAYER MOVEMENT CONTROLS
+12
+0.0
+1
+
+TEXTBOX
+916
+178
+1066
+196
+WALL CONTROLS
+12
+0.0
+1
+
+TEXTBOX
+50
+15
+200
+33
+GAME SETUP
+12
+0.0
+1
+
+TEXTBOX
+57
+144
+207
+162
+PLAY GAME
+12
+0.0
+1
+
+TEXTBOX
+1761
+567
+1911
+585
+DEBUG
+12
+0.0
+1
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-This project is a collaberative effort to make a game involving AI. The firt main feature is a random maze generation algorithm, the second is an algorithm that changes the maze at runtime by isolating different "shapes" that make up the maze and moving them around. The third feature is a FSM controlled enemy, and the final feature is A* pathfinding for the enemy.
+This project is a collaberative effort to make a game involving AI consisting of four main features. The first main feature is a random maze generation algorithm, the second is an algorithm that changes the maze at runtime by isolating different "shapes" that make up the maze and moving them around. The third feature is an FSM controlled enemy, and the final feature is A* pathfinding for the enemy.
 
 ## HOW IT WORKS
 
-Map Generation : 
+### Map Generation
+
+### Changing The Maze
+
+### Enemy FSM
+The enemy has 4 underlying states: **Wander**, **Seek**, **Catch**, and **Rest**.  These states are entered and exited under certain conditions in the simulation, and the enemy's own energy value.
+
+In the **Wander** state, it will randomly navigate the maze.
+
+In the **Seek** state, it will aggressively move towards the player.
+
+In the **Catch** state, it will kill the player and end the game.
+
+In the **Rest** state, it will become immobilised and regenerate energy.
+
+The enemy requires energy for its actions.  Energy is gained in the **Wander** and **Rest** states, and spent in the **Seek** and **Catch** states. 
+
+### A*
 
 ## HOW TO USE IT
 
-Press the Generate Map button to generate the map, then press the start button to start the game. Use the arrow keys to move the character. Try to get to the exit tile (violet patch). You can also experiment with the settings (more on that below).
+### Setup
+Press the Generate Map button to generate the map, then press "Call Base Setup" to initialise the game.
+Press the start button to start the game. 
+
+### Playing The Game
+Use the WASD or the on-screen keys to move the character. Try to get to the exit tile (violet patch). You can also experiment with the settings, which will be detailed below.
 
 ## THINGS TO NOTICE
 
 -Shapes do not form touching eachother
 -The exit always spawns on the top right, the player on the bottom left.
 -Wall Shapes tend to keep their form and don't merge with others.
--Wall shapes never crash into each other or push each other
+-Wall shapes never crash into each other or push each other.
+-The enemy states in the monitor.
+-The enemy energy value in the monitor.
+-The player can't move through the walls.
 
 ## THINGS TO TRY
 
-You can change : TODO things to changeS
+You can change : TODO things to change
 - Try to turn on the "showWallLabels", this way you can see which wall sections belong together.
 - Moving the X slider, the bigger the number it is, the more precentige the actual units need to vote yes to move the selection.
 - Try to select an option from the PreferedDirection to make the wall prefer to move to a certain direction.
 - Set the directionPreferenceIncluence which is a precentige how likely they will take your selected direction 
+- Adjust the weighting sliders, and see what effect they have on the enemy's movement.
 
 ## NETLOGO FEATURES
 
@@ -436,7 +573,7 @@ You can change : TODO things to changeS
 
 Maze Generaiton : Calum Brown
 Obstacle Movement : Zoltán Tompa
-Enemy FSM : Euan McMenemin
+Enemy FSM and Player : Euan McMenemin
 A* Implementarion : Adrian Lis
 @#$#@#$#@
 default
@@ -745,7 +882,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC3
+NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

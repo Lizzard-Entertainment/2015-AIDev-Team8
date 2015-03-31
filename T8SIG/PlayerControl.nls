@@ -1,5 +1,5 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;PLAYER
+;PLAYER CONTROLS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to PlayerUp  
@@ -11,32 +11,13 @@ to PlayerUp
     [ 
       set heading 0 
       
-      ;If that patch is black, then move onto it.
-      if [pcolor] of patch-ahead 1 = black
+      ;If that patch is black or violet, then move onto it.
+      if [pcolor] of patch-ahead 1 = black or [pcolor] of patch-ahead 1 = violet
       [
-        reset-destination
-        forward 1
-        set-destination
+        MovePlayer
       ]  
     ]
   ]
-end
-
-to reset-destination
-   if patch-here != one-of patches with [innerLabel = "source"]
-  [
-    ask patches with [innerLabel = "destination"]
-    [
-      set innerLabel ""
-    ]
-  ]
-end
-
-to set-destination       
-    ask patch-here 
-    [ 
-      set innerLabel "destination" 
-    ] 
 end
 
 to PlayerRight
@@ -48,12 +29,10 @@ to PlayerRight
     [ 
       set heading 90
       
-      ;If that patch is black, then move onto it.
-      if [pcolor] of patch-ahead 1 = black
+      ;If that patch is black or violet, then move onto it.
+      if [pcolor] of patch-ahead 1 = black or [pcolor] of patch-ahead 1 = violet
       [
-        reset-destination
-        forward 1
-        set-destination
+        MovePlayer
       ] 
     ]
   ]
@@ -68,12 +47,10 @@ to PlayerDown
     [ 
       set heading 180 
       
-      ;If that patch is black, then move onto it.
-      if [pcolor] of patch-ahead 1 = black
+      ;If that patch is black or violet, then move onto it.
+      if [pcolor] of patch-ahead 1 = black or [pcolor] of patch-ahead 1 = violet
       [
-        reset-destination
-        forward 1
-        set-destination
+        MovePlayer
       ] 
     ]
   ]
@@ -88,14 +65,51 @@ to PlayerLeft
     [ 
       set heading 270
       
-      ;If that patch is black, then move onto it.
-      if [pcolor] of patch-ahead 1 = black
+      ;If that patch is black or violet, then move onto it.
+      if [pcolor] of patch-ahead 1 = black or [pcolor] of patch-ahead 1 = violet
       [
-        reset-destination
-        forward 1
-        set-destination
+        MovePlayer
       ] 
     ]
+  ]
+  
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PLAYER FUNCTIONS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to MovePlayer
+  
+  ;;Reset the destination
+  if patch-here != one-of patches with [innerLabel = "source"]
+  [
+    ask patches with [innerLabel = "destination"]
+    [
+      set innerLabel ""
+    ]
+  ]
+  
+  ;;Move forward
+  forward 1
+  
+  ;;Set the new destination
+  ask patch-here 
+  [ 
+    set innerLabel "destination" 
+  ] 
+  
+  ;;Check for victory condition
+  CheckForVictory
+  
+end
+
+to CheckForVictory
+  
+  if [pcolor] of patch-here = violet and GameStarted = true
+  [
+    set Victory true
+    set GameStarted false
   ]
   
 end

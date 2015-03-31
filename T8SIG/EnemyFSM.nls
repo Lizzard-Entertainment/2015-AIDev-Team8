@@ -80,14 +80,14 @@ to WanderState
     if [pcolor] of patch-ahead 1 = black
     [
       ;Add a heavy weighting to the forward direction.
-      repeat 1 [ set directions lput 0 directions ]
+      repeat EnemyForwardWeight [ set directions lput 0 directions ]
     ]
     
     ;;Check to the right
     if [pcolor] of patch-right-and-ahead 90 1 = black
     [
       ;Add a light weighting to the right direction.
-      repeat 1 [ set directions lput 90 directions ]
+      repeat EnemyRightWeight [ set directions lput 90 directions ]
       
     ]
     
@@ -95,7 +95,7 @@ to WanderState
     if [pcolor] of patch-left-and-ahead 90 1 = black
     [
       ;Add a light weighting to the left direction.
-      repeat 1 [ set directions lput -90 directions ]
+      repeat EnemyLeftWeight [ set directions lput -90 directions ]
     ]    
   ]
   
