@@ -506,30 +506,7 @@ to gameover
   
 init
   
-let text matrix:from-row-list 
-[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 1 1 1 0 1 1 1 0 1 0 0 0 1 0 1 1 1 0 0]
-[1 0 0 0 0 1 0 1 0 1 1 0 1 1 0 1 0 0 0 0]
-[1 0 1 1 0 1 1 1 0 1 0 1 0 1 0 1 1 1 0 0]
-[1 0 0 1 0 1 0 1 0 1 0 0 0 1 0 1 0 0 0 0]
-[0 1 1 1 0 1 0 1 0 1 0 0 0 1 0 1 1 1 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 1 1 1 0 1 0 0 0 1 0 1 1 1 0 1 1 1 0]
-[0 0 1 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1]
-[0 0 1 0 1 0 0 1 0 1 0 0 1 1 1 0 1 1 1 1]
-[0 0 1 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0 1 0]
-[0 0 1 1 1 0 0 0 1 0 0 0 1 1 1 0 1 0 0 1]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
-[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
- 
- 
-let Tlabel matrix:from-row-list
+let text matrix:from-row-list
 
 [[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
@@ -572,7 +549,7 @@ while [i < 10]
   ;print i 
   print j
   ;;print matrix:get text 1 i
-   ask patch i j [ if( (matrix:get text (k) (l)) = 1) [ set pcolor red set plabel matrix:get Tlabel (k) (l) set groupID matrix:get Tlabel (k) (l)] ] 
+   ask patch i j [ if( (matrix:get text (k) (l)) > 0) [ set pcolor red set plabel matrix:get text (k) (l) set groupID matrix:get text (k) (l)] ] 
    set i i + 1 
    set l l + 1
 ]  
@@ -589,11 +566,65 @@ set UnitIDList [1 2 3 4 5 6 7 8]
 end
 
 to playerwins
+ 
+  init
   
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;;CODE FOR THE PLAYER VICTORY GOES IN HERE
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  user-message "You win!"
+  set Victory true
+  
+let text matrix:from-row-list 
+[[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 1 0 0 2 2 2 0 0 3 0 0 0 3 0 0]
+[0 1 0 0 0 1 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 1 0 0 0 1 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 0 1 0 1 0 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 0 0 1 0 0 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 0 0 1 0 0 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 0 0 1 0 0 0 2 0 0 0 2 0 3 0 0 0 3 0 0]
+[0 0 0 1 0 0 0 0 2 2 2 0 0 0 3 3 3 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 0 0 0 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 6 0 0 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 6 0 0 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 0 6 0 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 0 6 0 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 0 6 6 6 0 0]
+[0 4 0 4 0 4 0 0 0 5 0 0 0 6 0 0 6 6 0 0]
+[0 0 4 0 4 0 0 0 0 5 0 0 0 6 0 0 0 6 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+  
+  
+  
+let j 10
+let i -10
+let k 0
+let l 0
+
+set BGColor black
+
+while [j > -10]
+
+[
+
+set i -10
+set l 0
+while [i < 10]
+[
+  ;print i 
+  print j
+  ;;print matrix:get text 1 i
+   ask patch i j [ if( (matrix:get text (k) (l)) > 0) [ set pcolor red set plabel matrix:get text (k) (l) set groupID matrix:get text (k) (l)] ] 
+   set i i + 1 
+   set l l + 1
+]  
+ 
+ set j j - 1 
+ set k k + 1
+]
+
+set UnitIDList [1 2 3 4 5 6]
+
+  
   
 end
 
