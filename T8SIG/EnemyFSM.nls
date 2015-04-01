@@ -55,9 +55,6 @@ to WanderState
     
   ;;Update State
   set state "WANDER STATE"
-  
-  ;;Move forward if it has energy
-  forward 1
        
   ;;Regenerate energy quickly
   if energy < 100 [set energy energy + 2]
@@ -106,6 +103,9 @@ to WanderState
   
   ;;Change direction
   set heading heading + item value directions 
+  
+  ;;Move forward if it has energy
+  forward 1
   
 end
 
@@ -194,7 +194,7 @@ to-report canAct
    report true 
   ]
   [
-    set color blue
+    set color green
     report false
   ]
 end

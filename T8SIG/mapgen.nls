@@ -377,14 +377,8 @@ to makeExit
   ;set number of exits to zero
   let exits 0
   ;ask patch at position 8 8 
-    ask patch 8 8 
+    ask patches ; 8 8 
     [
-      ;if color = background color
-      if pcolor = backcolor
-      [
-        ;make color exit color 
-        set pcolor exitColor
-      ]
       ;if patch is a wall
       if pcolor = preWallColor
       [

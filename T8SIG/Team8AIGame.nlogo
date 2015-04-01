@@ -64,40 +64,57 @@ enemies-own
   current-path    ;;part of the path that is left to be traversed 
 ]
 
-
 to baseSetup
 
   
   ;;Initialise variables
   set GameStarted false
-  set Victory false
-  
-  ;;Create players
-  ask one-of patches with [pcolor = black]
+  ;Initialise exit patch variable (1 1 being arbitry)
+  let exitPatch patch 1 1 
+  let playercount 0
+  let spawnPatch patch 1 1 
+  ;;Get Exit patch
+  ask patches with [pcolor = violet]
   [
-    sprout-players 1
+    set exitPatch self
+  ]
+  ;;Create players
+  ask patches with [pcolor = black]
+  [
+    let sDistance [distance myself] of exitPatch
+    if playerCount = 0
     [
-      ask patch-here 
-      [
-        set innerLabel "destination" 
-      ]
+       if sDistance > spawnDistance
+       [
+         set playerCount playerCount + 1
+         set spawnPatch self
+         sprout-players 1
+         [
+           ask patch-here 
+           [
+             set innerLabel "destination" 
+           ]
+         ]
+       ]
+       
     ]
   ]
   
-  ask one-of patches with [pcolor = black and innerLabel != "destination"]
+  ask one-of patches with [pcolor = black and innerLabel != "destination" and [distance myself] of spawnPatch > spawnDistance]
   [
     ;;Create enemies
     sprout-enemies 1 
     [
       set shape "circle"
       set heading 0
-      set color yellow
       set energy 100
       set isResting false
       set state ""
       set current-path ""
     ]
-  ]  
+  ] 
+  
+  
   
   ;;Set Game Start
   set GameStarted true
@@ -326,10 +343,10 @@ NIL
 1
 
 BUTTON
-1102
-533
-1200
-566
+1100
+528
+1188
+561
 Player Right
 PlayerRight
 NIL
@@ -343,10 +360,10 @@ NIL
 1
 
 BUTTON
-1019
-575
-1120
-608
+1016
+528
+1102
+561
 Player Down
 PlayerDown
 NIL
@@ -360,10 +377,10 @@ NIL
 1
 
 BUTTON
-929
-539
-1021
-572
+930
+528
+1016
+561
 Player Left
 PlayerLeft
 NIL
@@ -503,6 +520,17 @@ DEBUG
 0.0
 1
 
+INPUTBOX
+1312
+40
+1411
+100
+spawnDistance
+15
+1
+0
+Number
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -511,9 +539,18 @@ This project is a collaberative effort to make a game involving AI consisting of
 ## HOW IT WORKS
 
 ### Map Generation
+The map generation starts by selecting "seed patches". It does this by randomly looking through all patches that are blue, when it has selected a patch it checks all of the neighbors of the patch are also blue (this makes sure that no two seed blocks are placed touching eachother). If the neighboring patches are blue then this is an ok place to put a seed block. 
 
+The second stage is generating the walls attatched to the seed blocks. We wanted to make sure that the generated walls never touch, to do this we first get all of the walls that make up the shape we are currently adding to and putting them into a list, then randomly choose a patch from that shape and then randomly choose a neighbor. Once it has chosen a neighbor it will check if it is ok to make a new wall here, to do this it will check the neighbors of this patch to see if one of the neighbors is wall of another shape. It does this by checking every neighbor against the list of walls and if only those walls are encountered we create a new wall patch. It does this until no more suitable wall patches are generated. 
 
+The third stage for the level generation is to fill in the gaps created by the wall generation, it checks all blue patches to see if any of them have all blue neighbors, and if they do it makes that patch a wall patch.
+ 
+The fourth stage is the creation of the outer walls, for this we just set the outer patches to be the wall color (red).
+
+The fith stage of the level creation is the finilization of the colors. Here we just change the colors of the patches to work with the other group members algorithms.
+The final stage of the level creation is the creation of the exit block for the player, this is always created in the top right of the maze.
 ### Changing The Maze
+
 After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and try to form Units with them. 
 Units stay together for the rest of the game. 
 After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement.
@@ -903,7 +940,7 @@ Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 
 @#$#@#$#@
-NetLogo 5.2-RC3
+NetLogo 5.1.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@

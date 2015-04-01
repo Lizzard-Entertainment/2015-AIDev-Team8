@@ -266,7 +266,7 @@ set selectedUnit  one-of UnitIDList ; gives a number between 1 and the number of
 if (DebugMSG) [print selectedUnit]
 ask patches with [groupID = selectedUnit] [set pcolor green]
 
-tick  
+;tick  
   
 end
 
@@ -418,8 +418,9 @@ to doMove
   ask patches with [(groupID = 0) and (pcolor != orange) and (pcolor != outerWallColor) and (pcolor != exitColor)] [set pcolor BGColor set plabel ""]
   
   set  UnitMoveCounter UnitMoveCounter + 1
+  CheckIfCrushed
   
-  tick
+  ;tick
   
 end
 
@@ -440,7 +441,7 @@ let exitloop false
   ;pick a random unit
   pickOneUnit
    
-  tick
+  ;tick
    
   ;see if they want to move
   decideIfMoving
@@ -466,9 +467,9 @@ let exitloop false
     if (length validMovesList != 0)
     [
       ;move there
-tick
+;tick
       doMove
-tick
+;tick
     ]
     
   ]
@@ -546,8 +547,6 @@ set i -10
 set l 0
 while [i < 10]
 [
-  ;print i 
-  print j
   ;;print matrix:get text 1 i
    ask patch i j [ if( (matrix:get text (k) (l)) > 0) [ set pcolor red set plabel matrix:get text (k) (l) set groupID matrix:get text (k) (l)] ] 
    set i i + 1 
@@ -610,8 +609,6 @@ set i -10
 set l 0
 while [i < 10]
 [
-  ;print i 
-  print j
   ;;print matrix:get text 1 i
    ask patch i j [ if( (matrix:get text (k) (l)) > 0) [ set pcolor red set plabel matrix:get text (k) (l) set groupID matrix:get text (k) (l)] ] 
    set i i + 1 
@@ -627,6 +624,5 @@ set UnitIDList [1 2 3 4 5 6]
   
   
 end
-
 
 

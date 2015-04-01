@@ -101,7 +101,8 @@ to MovePlayer
   
   ;;Check for victory condition
   CheckForVictory
-  
+  ;;Check if crushed by wall
+  CheckIfCrushed
 end
 
 to CheckForVictory
@@ -112,4 +113,15 @@ to CheckForVictory
     set GameStarted false
   ]
   
+end
+
+to CheckIfCrushed
+  ask players
+  [
+    if pcolor = blue and GameStarted = true
+    [
+          set GameStarted false
+          print "Inside Wall"
+    ]
+  ]
 end
