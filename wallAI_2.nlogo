@@ -5,13 +5,14 @@
 ;       by default, patches get a groupID variable with the initial value of 0 !!!
 ;       word wrapping has to be disabled
 ;       wall movement doesn't takes the player or enemy's into account, can just crushes them
+;       ;* notation is used for depricated code
 ;
 ;
 ;; BUGs::
 
 ;;TO-DOs
 
-;Ideas; 
+;;Ideas; 
 
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
 ;- add functionality to Unit reFormation (Join/Split Units)
