@@ -14,7 +14,6 @@
 ;Ideas; 
 
 ;- make Bricks they wanted to move initially more weighted in direction voting (use slider for ptc) than those who didn't
-;- add pickup that would change the tiles want to prefer a direction (set, like up/down/etc, OR away/to the player's location)
 ;- add functionality to Unit reFormation (Join/Split Units)
 ;/ they can "prefer" to join smaller/bigger/no prefference Units
 ;/ there will be a precentage for Join or not (one random no (on slider) for the whol Unit)
@@ -555,7 +554,7 @@ filling_level
 filling_level
 0
 500
-213
+239
 1
 1
 NIL
@@ -638,7 +637,7 @@ X
 X
 0
 10
-5
+3
 1
 1
 NIL
@@ -838,7 +837,8 @@ This Model emulates a basic artificial life environment, where a random map is g
 After map-formation, individual tiles (Bricks) look around in four directions for neighbouring Bricks and try to form Units with them.
 Units stay together for the rest of the game.
 After Unit-formation a Unit gets selected randomly and its members ask to vote for moving or staying. If they vote to move, they re-vote for the direction of movement.
-This can be influenced. Finally the Unit moves (if the movement is possible) and another Unit is selected...
+This can be influenced.
+Finally the Unit moves (if the movement is possible) and another Unit is selected and the cycle starts over...
 
 
 ## HOW TO USE IT
@@ -848,9 +848,9 @@ Then generate a map.
 Form initial Units.
 Press moveUnits.
 
-Control the moving willingness with the X slider.
-Control the required direction agreement precentige with the Y slider.
-Control the extra vote Bricks get that wanted to move in the first place. (not implemented)
+Control the moving willingness with the X slider. (the bigger the X the less likely they move)
+Control the required direction agreement precentige with the Y slider. (the bigger the Y the less more votes needed)
+Control the extra vote Bricks get that wanted to move in the first place. (not implemented yet)
 Select the prefered moving direction from the drop-down list
 Control the prefrecence influence with the slider below the list.
 
@@ -867,7 +867,6 @@ Wall shapes never crash into each other or push each other.
 If the Y slider is really high, Units take way longer to agree on a direction.
 Walls never vote to move to the same direction if they already found out it's invalid in the current iteration.
 
-(suggested things for the user to notice while running the model)
 
 ## THINGS TO TRY
 
