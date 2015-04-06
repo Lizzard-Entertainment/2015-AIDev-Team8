@@ -37,7 +37,7 @@ enemies-own
 to setup
   ;;Initialise world
   clear-all
-  import-world "TestWorld3.csv"
+  import-world "Maze.csv"
   
   ;;Initialise variables
   set GameStarted false
@@ -293,11 +293,13 @@ end
 to-report canSeek
   
   ;;Check for a player on the patches in a cone of radius 1, length 5.
-  ifelse any? players-on patches in-cone 5 1
+  ifelse any? players-on patches in-cone 5 360
   [
+    set color red
     report true
   ]
   [  
+    set color yellow
     report false
   ]
   
@@ -321,9 +323,11 @@ to-report canAct
   ;;If the enemy has less than 25 energy, it can't do anything and must rest.
   ifelse energy > 25 
   [
+   ;Color will be set by higher level state.
    report true 
   ]
   [
+    set color green
     report false
   ]
 end
@@ -356,10 +360,10 @@ ticks
 30.0
 
 BUTTON
-41
-43
-163
-76
+33
+75
+155
+108
 Setup
 setup
 NIL
@@ -373,10 +377,10 @@ NIL
 1
 
 BUTTON
-40
-110
-163
-143
+32
+118
+155
+151
 Move
 baseUpdate
 T
@@ -405,11 +409,11 @@ NIL
 HORIZONTAL
 
 BUTTON
-883
-138
-968
-171
-Player Up
+63
+224
+118
+257
+Up
 PlayerUp
 NIL
 1
@@ -422,11 +426,11 @@ NIL
 1
 
 BUTTON
-875
-269
-976
-302
-Player Down
+64
+299
+119
+332
+ Down
 PlayerDown
 NIL
 1
@@ -439,11 +443,11 @@ NIL
 1
 
 BUTTON
-765
-203
-857
-236
-Player Left
+23
+262
+78
+295
+Left
 PlayerLeft
 NIL
 1
@@ -456,11 +460,11 @@ NIL
 1
 
 BUTTON
-988
-209
-1086
-242
-Player Right
+98
+261
+153
+294
+Right
 PlayerRight
 NIL
 1
@@ -473,10 +477,10 @@ NIL
 1
 
 MONITOR
-37
-180
-166
-225
+722
+54
+851
+99
 Current Enemy State
 [ state ] of enemy 2
 17
@@ -484,10 +488,10 @@ Current Enemy State
 11
 
 MONITOR
-36
-238
-168
-283
+721
+112
+853
+157
 Enemy Energy
 [energy] of enemy 2
 17
@@ -495,10 +499,10 @@ Enemy Energy
 11
 
 SLIDER
-11
-348
-167
-381
+720
+229
+876
+262
 EnemyForwardWeighting
 EnemyForwardWeighting
 1
@@ -510,10 +514,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-11
-383
-167
-416
+720
+264
+876
+297
 EnemyLeftWeighting
 EnemyLeftWeighting
 1
@@ -525,10 +529,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-418
-166
-451
+719
+299
+875
+332
 EnemyRightWeighting
 EnemyRightWeighting
 1
@@ -538,6 +542,46 @@ EnemyRightWeighting
 1
 NIL
 HORIZONTAL
+
+TEXTBOX
+21
+57
+171
+75
+ENVIRONMENT CONTROLS
+12
+0.0
+1
+
+TEXTBOX
+733
+36
+883
+54
+ENEMY MONITORS
+12
+0.0
+1
+
+TEXTBOX
+34
+202
+184
+220
+PLAYER CONTROLS
+12
+0.0
+1
+
+TEXTBOX
+721
+210
+871
+228
+ENEMY CONTROLS
+12
+0.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
